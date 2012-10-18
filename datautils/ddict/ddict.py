@@ -16,7 +16,7 @@ These utilities are meant to allow for access like this
 dget(d, 'a.b')
 """
 
-from ops import rget, rset, rdel
+from ops import dget, dset, ddel
 
 
 class DDict(dict):
@@ -35,16 +35,16 @@ class DDict(dict):
         if '.' not in key:
             return dict.__getitem__(self, key)
         # recursively get
-        return rget(self, key.split('.'))
+        return dget(self, key)
 
     def __setitem__(self, key, value):
         if '.' not in key:
             dict.__setitem__(self, key, value)
         #self[key] = value
-        rset(self, key.split('.'), value)
+        dset(self, key, value)
 
     def __delitem__(self, key):
         if '.' not in key:
             return dict.__deleteitem__(self, key)
         #del self[key]
-        rdel(self, key.split('.'))
+        ddel(self, key)
