@@ -40,8 +40,9 @@ class DDict(dict):
     def __setitem__(self, key, value):
         if '.' not in key:
             dict.__setitem__(self, key, value)
-        #self[key] = value
-        dset(self, key, value)
+        else:
+            #self[key] = value
+            dset(self, key, value)
 
     def __delitem__(self, key):
         if '.' not in key:
