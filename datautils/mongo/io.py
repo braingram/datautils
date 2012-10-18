@@ -5,6 +5,7 @@ import cPickle as pickle
 
 import numpy
 import pymongo
+import pymongo.binary
 
 from .. import ddict
 
