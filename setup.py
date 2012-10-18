@@ -17,7 +17,7 @@ scripts = None
 requirements_file = None
 requirements = None
 dependency_links = None
-use_numpy = True
+use_numpy = False
 
 # ---------------------
 
@@ -231,5 +231,7 @@ if __name__ == '__main__':
             include_package_data=True,
 
             install_requires=requirements,
-            dependency_links=dependency_links
+            dependency_links=dependency_links,
+            author="Brett Graham",
+            author_email="braingram720@gmail.com",
         )
