@@ -6,9 +6,9 @@ from discrete import DiscreteGroup
 DefaultGroup = DiscreteGroup
 
 
-def guess_type(values):
+def guess_type(values, key=None):
     # try to guess type of grouping
-    v = values[0]
+    v = values[0] if key is None else key(values[0])
     if isinstance(v, float):
         return ContinuousGroup
     else:
@@ -45,8 +45,8 @@ def group(values, key=None, levels=None, gtype=None, gkwargs=None):
     gkwargs : dict
         group kwargs see gtype.group
     """
-    vs = [key(v) for v in values] if (key is not None) else values
-    gtype = guess_type(vs) if gtype is None else lookup_gtype(gtype)
+#    vs = [key(v) for v in values] if (key is not None) else values
+    gtype = guess_type(values, key) if gtype is None else lookup_gtype(gtype)
     g = gtype(levels)
     gkwargs = {} if gkwargs is None else gkwargs
-    return g(vs, **gkwargs)
+    return g(values, key=key, **gkwargs)

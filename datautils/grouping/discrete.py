@@ -21,8 +21,8 @@ except ImportError, E:
 
 
 class DiscreteGroup(Group):
-    def find_levels(self, values, **kwargs):
-        self.levels = find_levels(values, **kwargs)
+    def find_levels(self, values, key=None, **kwargs):
+        self.levels = find_levels(values, key=key, **kwargs)
 
 
 def level_test(name):
@@ -31,8 +31,9 @@ def level_test(name):
     return f
 
 
-def find_levels(values, **kwargs):
-    ns = unique(values)
+def find_levels(values, key=None, **kwargs):
+    vs = values if key is None else map(key, values)
+    ns = unique(vs)
     try:
         ns.sort()
     except:

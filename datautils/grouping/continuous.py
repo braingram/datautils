@@ -20,8 +20,8 @@ except ImportError, E:
 
 
 class ContinuousGroup(Group):
-    def find_levels(self, values, **kwargs):
-        self.levels = find_levels(values, **kwargs)
+    def find_levels(self, values, key=None, **kwargs):
+        self.levels = find_levels(values, key=None, **kwargs)
 
 
 def right_level_test(start, end):
@@ -72,9 +72,11 @@ def name_function(ftype):
         return lambda s, e: "(%g, %g)" % (s, e)
 
 
-def find_levels(values, n=None, inclusive='histogram', names='start'):
-    n = len(values) ** 0.5 if n is None else n
-    vmin, vmax = minmax(values)
+def find_levels(values, key=None, n=None, \
+        inclusive='histogram', names='start'):
+    vs = values if key is None else map(key, values)
+    n = len(vs) ** 0.5 if n is None else n
+    vmin, vmax = minmax(vs)
     bounds = linspace(vmin, vmax, n + 1)
     to_name = name_function(names)
     if inclusive == 'histogram':
