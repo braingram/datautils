@@ -6,22 +6,27 @@ from discrete import DiscreteGroup
 DefaultGroup = DiscreteGroup
 
 
-def guess_type(values, key):
+def guess_type(values):
     # try to guess type of grouping
-    return DiscreteGroup
-    if key is None:
-        t = type(values[0])
-    else:
-        t = type(key(values[0]))
-    if t in (int, str, bool):
-        return DiscreteGroup
-    elif t in (float, ):
+    v = values[0]
+    if isinstance(v, float):
         return ContinuousGroup
     else:
         return DiscreteGroup
 
 
-def group(values, key=None, levels=None, gtype=None, lkwargs=None):
+def lookup_gtype(gtype):
+    if isinstance(gtype, str):
+        if gtype == 'discrete':
+            return DiscreteGroup
+        elif gtype == 'continuous':
+            return ContinuousGroup
+    elif gtype in (DiscreteGroup, ContinuousGroup):
+        return gtype
+    raise ValueError("Unknown gtype[%s]" % gtype)
+
+
+def group(values, key=None, levels=None, gtype=None, gkwargs=None):
     """
 
     values : list, tuple or etc...
@@ -33,10 +38,15 @@ def group(values, key=None, levels=None, gtype=None, lkwargs=None):
     levels : dict
         grouping levels, keys=names, values=test functions
 
-    lkwargs : dict
-        level kwargs
+    gtype : str, class or None (default)
+        the grouping class or string to lookup class (see lookup_gtype)
+        if None, gtype will be guesssed (guess_gtype)
+
+    gkwargs : dict
+        group kwargs see gtype.group
     """
-    vs = [key(v) for v in values] if (values is not None) else values
-    gtype = guess_type(vs) if gtype is None else gtype
+    vs = [key(v) for v in values] if (key is not None) else values
+    gtype = guess_type(vs) if gtype is None else lookup_gtype(gtype)
     g = gtype(levels)
-    return g(vs, lkwargs)
+    gkwargs = {} if gkwargs is None else gkwargs
+    return g(vs, **gkwargs)

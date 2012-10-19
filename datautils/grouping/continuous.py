@@ -72,10 +72,11 @@ def name_function(ftype):
         return lambda s, e: "(%g, %g)" % (s, e)
 
 
-def find_levels(values, n=10, inclusive='histogram', names='start'):
+def find_levels(values, n=None, inclusive='histogram', names='start'):
+    n = len(values) ** 0.5 if n is None else n
     vmin, vmax = minmax(values)
     bounds = linspace(vmin, vmax, n + 1)
-    to_name = lambda s, e: s
+    to_name = name_function(names)
     if inclusive == 'histogram':
         lvls = {}
         # all but last are half-open
