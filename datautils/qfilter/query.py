@@ -5,7 +5,7 @@ Mongo-like queries on a list of dicts
 I have not implemented the full set of mongodb queries [see vtests]
 """
 
-import collections
+#import collections
 from ..ddict import dget
 
 
@@ -23,12 +23,10 @@ vtests = {
         '$all': lambda t: lambda v: all((ti in v for ti in tuple(t))),
         '$ne': lambda t: lambda v: v != t,
         '$in': lambda t: lambda v: (any((vi in t for vi in v))) \
-                if isinstance(v, collections.Iterable) and \
-                not (isinstance(v, str)) \
+                if isinstance(v, (tuple, list)) \
                 else (v in t),
         '$nin': lambda t: lambda v: (all((vi not in t for vi in v))) \
-                if isinstance(v, collections.Iterable) and \
-                not (isinstance(v, str)) \
+                if isinstance(v, (tuple, list)) \
                 else (v not in t),
         #'$nor': ???
         #'$or': ???
