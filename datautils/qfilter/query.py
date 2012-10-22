@@ -10,6 +10,9 @@ from ..ddict import dget
 
 
 # ----------- Query Value parsing -----------
+# for a given test value [t] construct a value test that when run on
+# a value [v] returns either True or False indicating if the value
+# passed the test
 vtests = {
         '$lt': lambda t: lambda v: v < t,
         '$lte': lambda t: lambda v: v <= t,
@@ -20,10 +23,12 @@ vtests = {
         '$all': lambda t: lambda v: all((ti in v for ti in tuple(t))),
         '$ne': lambda t: lambda v: v != t,
         '$in': lambda t: lambda v: (any((vi in t for vi in v))) \
-                if isinstance(v, collections.Iterable) \
+                if isinstance(v, collections.Iterable) and \
+                not (isinstance(v, str)) \
                 else (v in t),
         '$nin': lambda t: lambda v: (all((vi not in t for vi in v))) \
-                if isinstance(v, collections.Iterable) \
+                if isinstance(v, collections.Iterable) and \
+                not (isinstance(v, str)) \
                 else (v not in t),
         #'$nor': ???
         #'$or': ???
@@ -139,6 +144,9 @@ def test_qfilter():
     assert len(qfilter(items, {'a.b.c': {'$in': [1, 2, 3]}})) == 2
     assert len(qfilter(items, {'a.b.c': {'$in': [2, 3]}})) == 1
     assert len(qfilter(items, {'a.b.c': {'$in': [3, 4]}})) == 0
+    # --- test with strings --
+    assert len(qfilter([{'a': {'b': 'foo'}}], \
+            {'a.b': {'$in': ['foo', 'bar']}})) == 1
     # nin
     assert len(qfilter(items, {'a.b.c': {'$nin': [3, 4]}})) == 2
     assert len(qfilter(items, {'a.b.c': {'$nin': [2, 3]}})) == 1
