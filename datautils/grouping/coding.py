@@ -41,7 +41,8 @@ class ContinuousCodec:
 
 
 def discrete_to_codes_from_codec(values, codec):
-    return [codec[v] for v in values], codec
+    codec = DiscreteCodec(codec) if isinstance(codec, dict) else codec
+    return [codec(v) for v in values], codec
 
 
 def discrete_to_codes_from_auto_codec(values, code_min, code_max):
@@ -54,16 +55,16 @@ def discrete_to_codes_from_auto_sorted_codec(values, \
     codec = {}
     for v in values:
         codec[v] = 1
-    cr = code_max - code_min
+    # code range / value range
+    m = (code_max - code_min) / (len(codec.keys()) - 1)
     for (i, k) in enumerate(sort_codec(codec.keys())):
-        codec[k] = (i * cr) + code_min
+        codec[k] = (i * m) + code_min
     return discrete_to_codes_from_codec(values, codec)
 
 
 def discrete_to_codes(values, code_min=0., code_max=1., \
         codec=None, sort_codec=None):
     if (codec is not None):
-        codec = DiscreteCodec(codec) if isinstance(codec, dict) else codec
         return discrete_to_codes_from_codec(values, codec)
     if (sort_codec is None) or (sort_codec == False):
         return discrete_to_codes_from_auto_codec(values, code_min, code_max)
