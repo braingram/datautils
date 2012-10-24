@@ -21,7 +21,7 @@ except ImportError, E:
 
 class ContinuousGroup(Group):
     def find_levels(self, values, key=None, **kwargs):
-        self.levels = find_levels(values, key=None, **kwargs)
+        self.levels = find_levels(values, key, **kwargs)
 
 
 def right_level_test(start, end):
