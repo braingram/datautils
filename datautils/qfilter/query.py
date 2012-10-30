@@ -6,10 +6,38 @@ I have not implemented the full set of mongodb queries [see vtests]
 """
 
 #import collections
+import itertools
+
 from ..ddict import dget
 
 
 # ----------- Query Value parsing -----------
+def elemMatch_vtest(t):
+    test = make_value_test(t)
+
+    def elem_test(value):
+        return any([test(v) for v in itertools.chain.from_iterable(value)])
+    return elem_test
+
+
+def not_vtest(t):
+    test = make_value_test(t)
+    return lambda v: (not test(v))
+
+
+def nor_vtest(t):
+    tests = [make_value_test(i) for i in t]
+    return lambda v: not any([t(v) for t in tests])
+
+
+def or_vtest(t):
+    tests = [make_value_test(i) for i in t]
+    return lambda v: any([t(v) for t in tests])
+
+
+def and_vtest(t):
+    tests = [make_value_test(i) for i in t]
+    return lambda v: all([t(v) for t in tests])
 # for a given test value [t] construct a value test that when run on
 # a value [v] returns either True or False indicating if the value
 # passed the test
@@ -28,13 +56,14 @@ vtests = {
         '$nin': lambda t: lambda v: (all((vi not in t for vi in v))) \
                 if isinstance(v, (tuple, list)) \
                 else (v not in t),
-        #'$nor': ???
-        #'$or': ???
-        #'$and': ???
+        '$nor': nor_vtest,
+        '$or': or_vtest,
+        '$and': and_vtest,
         #'$size': ???
         #'$type': ???
         #'$elemMatch': ???
-        #'$not': ???
+        '$elemMatch': elemMatch_vtest,
+        '$not': not_vtest
         }
 
 
