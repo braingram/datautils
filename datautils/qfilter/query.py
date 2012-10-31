@@ -71,7 +71,8 @@ def make_value_test(value):
     """
     """
     if not isinstance(value, dict):
-        return lambda v: v == value
+        return lambda v: value in v if isinstance(v, (tuple, list)) \
+                else v == value
     # run all value tests, short-circuit on first False
     tests = [vtests[k](v) for k, v in value.iteritems()]
     return lambda v: all((t(v) for t in tests))
