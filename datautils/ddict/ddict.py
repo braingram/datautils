@@ -46,6 +46,17 @@ class DDict(dict):
 
     def __delitem__(self, key):
         if '.' not in key:
-            return dict.__deleteitem__(self, key)
+            return dict.__delitem__(self, key)
         #del self[key]
         ddel(self, key)
+
+    def get(self, key, default=None):
+        try:
+            i = self[key]
+            return i
+        except KeyError:
+            # this doesn't catch TypeError (thrown when attempting to access a
+            # non-dict like a dict: d = {'a': {'b': 1}}; d.get('a.b.c'))
+            # this seems like the right thing to do as it's incorrectly trying
+            # to use a leaf node
+            return default
