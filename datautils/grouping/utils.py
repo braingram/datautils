@@ -50,3 +50,13 @@ def group(values, key=None, levels=None, gtype=None, gkwargs=None):
     g = gtype(levels)
     gkwargs = {} if gkwargs is None else gkwargs
     return g(values, key=key, **gkwargs)
+
+
+def group2(values, key1=None, key2=None, \
+        levels1=None, levels2=None, \
+        gtype1=None, gtype2=None, \
+        gkwargs1=None, gkwargs2=None):
+    return dict([(k, group(v, key=key2, levels=levels2, \
+            gtype=gtype2, gkwargs=gkwargs2)) \
+            for k, v in group(values, key=key1, levels=levels1, \
+            gtype=gtype1, gkwargs=gkwargs1).iteritems()])
