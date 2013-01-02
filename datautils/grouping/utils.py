@@ -17,9 +17,9 @@ def guess_type(values, key=None):
 
 def lookup_gtype(gtype):
     if isinstance(gtype, str):
-        if gtype == 'discrete':
+        if (gtype in ('discrete', 'd',)):
             return DiscreteGroup
-        elif gtype == 'continuous':
+        elif (gtype in ('continuous', 'c')):
             return ContinuousGroup
     elif gtype in (DiscreteGroup, ContinuousGroup):
         return gtype
@@ -60,3 +60,46 @@ def group2(values, key1=None, key2=None, \
             gtype=gtype2, gkwargs=gkwargs2)) \
             for k, v in group(values, key=key1, levels=levels1, \
             gtype=gtype1, gkwargs=gkwargs1).iteritems()])
+
+
+def dwalk(d):
+    for k, v in d.iteritems():
+        if isinstance(v, dict):
+            for sk, sv in dwalk(v):
+                yield (k, ) + sk, sv
+        else:
+            yield (k, ), v
+
+
+def groupN(values, keys=None, levels=None, gtypes=None, gkwargs=None):
+    nlvls = [len(i) for i in (keys, levels, gtypes, gkwargs) if \
+            (i is not None) and (hasattr(i, '__len__'))]
+    if len(nlvls) == 0:
+        raise ValueError('One of the following must be a list or tuple: ' \
+            'keys, levels, gtypes, gkwargs')
+    nlvls = max(nlvls)
+    if (not hasattr(keys, '__len__')):
+        keys = [keys] * nlvls
+
+    if (levels is None) or (not hasattr(levels[0], '__len__')):
+        levels = [levels] * nlvls
+
+    if (not hasattr(gtypes, '__len__')):
+        gtypes = [gtypes] * nlvls
+
+    if (gkwargs is None) or (isinstance(gkwargs), dict):
+        gkwargs = [gkwargs] * nlvls
+
+    for i in (keys, levels, gtypes, gkwargs):
+        if len(i) != nlvls:
+            raise ValueError("argument does not contain enough " \
+                "[%i] items: %s" % (nlvls, i))
+
+    for i in xrange(nlvls):
+        if i == 0:
+            g = group(values, keys[i], levels[i], gtypes[i], gkwargs[i])
+        else:
+            for ks, vs in dwalk(g):
+                reduce(dict.__getitem__, ks[:-1], g)[ks[-1]] = \
+                        group(vs, keys[i], levels[i], gtypes[i], gkwargs[i])
+    return g
