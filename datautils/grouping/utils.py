@@ -71,7 +71,7 @@ def dwalk(d):
             yield (k, ), v
 
 
-def groupN(values, keys=None, levels=None, gtypes=None, gkwargs=None):
+def groupn(values, keys=None, levels=None, gtypes=None, gkwargs=None):
     nlvls = [len(i) for i in (keys, levels, gtypes, gkwargs) if \
             (i is not None) and (hasattr(i, '__len__'))]
     if len(nlvls) == 0:
