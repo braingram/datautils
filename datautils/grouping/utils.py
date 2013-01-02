@@ -46,6 +46,9 @@ def group(values, key=None, levels=None, gtype=None, gkwargs=None):
         group kwargs see gtype.group
     """
 #    vs = [key(v) for v in values] if (key is not None) else values
+    if isinstance(key, str):
+        sv = key
+        key = lambda x: x[sv]
     gtype = guess_type(values, key) if gtype is None else lookup_gtype(gtype)
     g = gtype(levels)
     gkwargs = {} if gkwargs is None else gkwargs
@@ -84,7 +87,7 @@ def groupn(values, keys=None, levels=None, gtypes=None, gkwargs=None):
     if (levels is None) or (not hasattr(levels[0], '__len__')):
         levels = [levels] * nlvls
 
-    if (not hasattr(gtypes, '__len__')):
+    if isinstance(gtypes, str) or (not hasattr(gtypes, '__len__')):
         gtypes = [gtypes] * nlvls
 
     if (gkwargs is None) or (isinstance(gkwargs), dict):
