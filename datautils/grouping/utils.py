@@ -8,6 +8,8 @@ DefaultGroup = DiscreteGroup
 
 def guess_type(values, key=None):
     # try to guess type of grouping
+    if len(values) == 0:
+        return DiscreteGroup
     v = values[0] if key is None else key(values[0])
     if isinstance(v, float):
         return ContinuousGroup
@@ -45,7 +47,8 @@ def group(values, key=None, levels=None, gtype=None, gkwargs=None):
     gkwargs : dict
         group kwargs see gtype.group
     """
-#    vs = [key(v) for v in values] if (key is not None) else values
+    if len(values) == 0:
+        return {}
     if isinstance(key, str):
         sv = key
         key = lambda x: x[sv]
