@@ -99,10 +99,9 @@ def mask_array(array, conditions, operator, selector=None, combiner='and'):
         for (cond, o, s, c) in zip(conditions, op, sel, comb):
             m = c(m, o(s(array), cond))
         return m
-    else:
-        assert not islist(op)
-        assert not islist(sel)
-        return op(sel(array), conditions)
+    assert not islist(op)
+    assert not islist(sel)
+    return op(sel(array), conditions)
 
 
 def test_mask_array():
