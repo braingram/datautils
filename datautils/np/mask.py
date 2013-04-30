@@ -97,7 +97,10 @@ def mask_array(array, conditions, operator, selector=None, combiner='and'):
         else:
             m = numpy.zeros(array.size, dtype=bool)
         for (cond, o, s, c) in zip(conditions, op, sel, comb):
-            m = c(m, o(s(array), cond))
+            #foo = s(array)  # 1.2%
+            #bar = o(foo, cond)  # 61.7%
+            #m = c(m, bar)  # 29%
+            m = c(m, o(s(array), cond))  # all the time
         return m
     assert not islist(op)
     assert not islist(sel)
