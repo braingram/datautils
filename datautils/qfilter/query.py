@@ -42,29 +42,29 @@ def and_vtest(t):
 # a value [v] returns either True or False indicating if the value
 # passed the test
 vtests = {
-        '$lt': lambda t: lambda v: v < t,
-        '$lte': lambda t: lambda v: v <= t,
-        '$gt': lambda t: lambda v: v > t,
-        '$gte': lambda t: lambda v: v >= t,
-        #'$exists': make_exists_test(t, v),  # done elsewhere
-        #'$mod': ???
-        '$all': lambda t: lambda v: all((ti in v for ti in tuple(t))),
-        '$ne': lambda t: lambda v: v != t,
-        '$in': lambda t: lambda v: (any((vi in t for vi in v))) \
-                if isinstance(v, (tuple, list)) \
-                else (v in t),
-        '$nin': lambda t: lambda v: (all((vi not in t for vi in v))) \
-                if isinstance(v, (tuple, list)) \
-                else (v not in t),
-        '$nor': nor_vtest,
-        '$or': or_vtest,
-        '$and': and_vtest,
-        #'$size': ???
-        #'$type': ???
-        #'$elemMatch': ???
-        '$elemMatch': elemMatch_vtest,
-        '$not': not_vtest
-        }
+    '$lt': lambda t: lambda v: v < t,
+    '$lte': lambda t: lambda v: v <= t,
+    '$gt': lambda t: lambda v: v > t,
+    '$gte': lambda t: lambda v: v >= t,
+    #'$exists': make_exists_test(t, v),  # done elsewhere
+    #'$mod': ???
+    '$all': lambda t: lambda v: all((ti in v for ti in tuple(t))),
+    '$ne': lambda t: lambda v: v != t,
+    '$in': lambda t: lambda v: (any((vi in t for vi in v))) \
+            if isinstance(v, (tuple, list)) \
+            else (v in t),
+    '$nin': lambda t: lambda v: (all((vi not in t for vi in v))) \
+            if isinstance(v, (tuple, list)) \
+            else (v not in t),
+    '$nor': nor_vtest,
+    '$or': or_vtest,
+    '$and': and_vtest,
+    #'$size': ???
+    #'$type': ???
+    #'$elemMatch': ???
+    '$elemMatch': elemMatch_vtest,
+    '$not': not_vtest
+    }
 
 
 def make_value_test(value):
