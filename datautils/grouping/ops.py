@@ -30,6 +30,24 @@ def combine(d0, d1, r=None):
 
 
 def drop_levels(groups, lvls):
+    """
+    Drop grouping levels
+
+    lvls : int or list of ints
+        index of levels to drop (0 is root levels: groups.keys())
+
+    Example
+    ------
+    d = {
+        'a': {'1': [1, ], '2': [2, ]},
+        'b': {'1': [3, ], '2': [4, ]},
+    }
+    d0 = drop_levels(d, 0)
+    d0 = {
+        '1': [1, 3],
+        '2': [2, 4],
+    }
+    """
     lvls = sorted(listify(lvls))
     # no levels supplied
     if len(lvls) == 0:
@@ -59,6 +77,29 @@ def drop_levels(groups, lvls):
 
 
 def collapse(groups, spaces):
+    """
+    Collapse grouping levels
+
+    spaces : int or list of ints
+        index of spaces between levels to combine
+        (space 0 combines groups.keys() and groups[foo].keys())
+
+    Returned group keys are tuples of the collapsed level keys
+
+    Example
+    ------
+    d = {
+        'a': {'1': [1, ], '2': [2, ]},
+        'b': {'1': [3, ], '2': [4, ]},
+    }
+    d0 = collapse(d, 0)
+    d0 = {
+        ('a', '1'): [1, ],
+        ('a', '2'): [2, ],
+        ('b', '1'): [3, ],
+        ('b', '2'): [4, ],
+    }
+    """
     spaces = sorted(listify(spaces))
     # no levels supplied
     if len(spaces) == 0:
