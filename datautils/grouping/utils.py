@@ -58,14 +58,14 @@ def group(values, key=None, levels=None, gtype=None, gkwargs=None):
     return g(values, key=key, **gkwargs)
 
 
-def group2(values, key1=None, key2=None, \
-        levels1=None, levels2=None, \
-        gtype1=None, gtype2=None, \
-        gkwargs1=None, gkwargs2=None):
-    return dict([(k, group(v, key=key2, levels=levels2, \
-            gtype=gtype2, gkwargs=gkwargs2)) \
-            for k, v in group(values, key=key1, levels=levels1, \
-            gtype=gtype1, gkwargs=gkwargs1).iteritems()])
+def group2(values, key1=None, key2=None,
+           levels1=None, levels2=None,
+           gtype1=None, gtype2=None,
+           gkwargs1=None, gkwargs2=None):
+    return dict([(k, group(v, key=key2, levels=levels2,
+                 gtype=gtype2, gkwargs=gkwargs2))
+                 for k, v in group(values, key=key1, levels=levels1,
+                 gtype=gtype1, gkwargs=gkwargs1).iteritems()])
 
 
 def dwalk(d):
@@ -78,11 +78,12 @@ def dwalk(d):
 
 
 def groupn(values, keys=None, levels=None, gtypes=None, gkwargs=None):
-    nlvls = [len(i) for i in (keys, levels, gtypes, gkwargs) if \
-            (i is not None) and (hasattr(i, '__len__'))]
+    nlvls = [len(i) for i in (keys, levels, gtypes, gkwargs) if
+             (i is not None) and (not isinstance(i, str)) and
+             (hasattr(i, '__len__'))]
     if len(nlvls) == 0:
-        raise ValueError('One of the following must be a list or tuple: ' \
-            'keys, levels, gtypes, gkwargs')
+        raise ValueError('One of the following must be a list or tuple: '
+                         'keys, levels, gtypes, gkwargs')
     nlvls = max(nlvls)
     if (not hasattr(keys, '__len__')):
         keys = [keys] * nlvls
@@ -98,8 +99,8 @@ def groupn(values, keys=None, levels=None, gtypes=None, gkwargs=None):
 
     for i in (keys, levels, gtypes, gkwargs):
         if len(i) != nlvls:
-            raise ValueError("argument does not contain enough " \
-                "[%i] items: %s" % (nlvls, i))
+            raise ValueError("argument does not contain enough "
+                             "[%i] items: %s" % (nlvls, i))
 
     for i in xrange(nlvls):
         if i == 0:
@@ -107,5 +108,5 @@ def groupn(values, keys=None, levels=None, gtypes=None, gkwargs=None):
         else:
             for ks, vs in dwalk(g):
                 reduce(dict.__getitem__, ks[:-1], g)[ks[-1]] = \
-                        group(vs, keys[i], levels[i], gtypes[i], gkwargs[i])
+                    group(vs, keys[i], levels[i], gtypes[i], gkwargs[i])
     return g
