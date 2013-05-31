@@ -40,6 +40,9 @@ def write(d, pchar=','):
         return int(d)
     elif isinstance(d, numpy.floating):
         return float(d)
+    elif isinstance(d, numpy.void):
+        return dict([(k.replace('.', pchar), write(d[k]))
+                     for k in d.dtype.names])
     return d
 
 
