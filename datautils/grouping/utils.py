@@ -2,6 +2,7 @@
 
 from continuous import ContinuousGroup
 from discrete import DiscreteGroup
+from .. import ddict
 
 DefaultGroup = DiscreteGroup
 
@@ -28,7 +29,7 @@ def lookup_gtype(gtype):
     raise ValueError("Unknown gtype[%s]" % gtype)
 
 
-def group(values, key=None, levels=None, gtype=None, gkwargs=None):
+def group(values, key=None, levels=None, gtype=None, gkwargs=None, dget=True):
     """
 
     values : list, tuple or etc...
@@ -46,12 +47,18 @@ def group(values, key=None, levels=None, gtype=None, gkwargs=None):
 
     gkwargs : dict
         group kwargs see gtype.group
+
+    dget : bool
+        use dotted get for string keys (see ddict.ops.dget)
     """
     if len(values) == 0:
         return {}
     if isinstance(key, str):
         sv = key
-        key = lambda x: x[sv]
+        if dget:
+            key = lambda x: ddict.ops.dget(x, sv)
+        else:
+            key = lambda x: x[sv]
     gtype = guess_type(values, key) if gtype is None else lookup_gtype(gtype)
     g = gtype(levels)
     gkwargs = {} if gkwargs is None else gkwargs
@@ -77,7 +84,8 @@ def dwalk(d):
             yield (k, ), v
 
 
-def groupn(values, keys=None, levels=None, gtypes=None, gkwargs=None):
+def groupn(values, keys=None, levels=None, gtypes=None, gkwargs=None,
+           dget=True):
     nlvls = [len(i) for i in (keys, levels, gtypes, gkwargs) if
              (i is not None) and (not isinstance(i, str)) and
              (hasattr(i, '__len__'))]
@@ -104,7 +112,8 @@ def groupn(values, keys=None, levels=None, gtypes=None, gkwargs=None):
 
     for i in xrange(nlvls):
         if i == 0:
-            g = group(values, keys[i], levels[i], gtypes[i], gkwargs[i])
+            g = group(values, keys[i], levels[i], gtypes[i], gkwargs[i],
+                      dget=dget)
         else:
             for ks, vs in dwalk(g):
                 reduce(dict.__getitem__, ks[:-1], g)[ks[-1]] = \
