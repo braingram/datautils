@@ -182,6 +182,48 @@ def pick(gts, key, default=None):
     return r
 
 
+def stat(gts, func, pick_key=None):
+    """
+    Apply some function (func) to each leaf
+
+    func : function
+        function to apply at each leaf as func(values)
+
+    pick_key : string [default: None]
+        if not None, leaf values will be picked with pick(gts, pick_key)
+    """
+    if pick_key is not None:
+        d = pick(gts, pick_key)
+    else:
+        d = gts
+
+    r = {}
+    for k in d.keys():
+        if isinstance(d[k], dict):
+            r[k] = stat(d[k], func)
+        elif isinstance(d[k], (list, tuple)):
+            r[k] = func(d[k])
+    return r
+
+
+def test_stat():
+    d = {
+        'a': {
+            'b': [0, 0, 0, 0],
+            'c': [1, 1, 1],
+            'd': [2, 2],
+        },
+    }
+
+    tmd = {'a': {'b': 0, 'c': 1, 'd': 2}}
+    tld = {'a': {'b': 4, 'c': 3, 'd': 2}}
+
+    md = stat(d, lambda x: sum(x) / float(len(x)))
+    assert md == tmd
+    ld = stat(d, lambda x: len(x))
+    assert ld == tld
+
+
 def test_pick():
     d = {
         'a': {'b': [{'a': 1, 'b': 2, 'c': 3}]},
