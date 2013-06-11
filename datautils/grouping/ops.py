@@ -134,6 +134,88 @@ def collapse(groups, spaces):
     return r
 
 
+def prune(gts, *keys):
+    """
+    Remove keys from leaf items
+
+    keys : vargs
+        keys to remove
+
+    Example
+    ------
+    prune({'a': {'b': [{'a': 1, 'b': 2, 'c': 3}]}}, 'a', 'b') ==
+        {'a': {'b': [{'c': 3}]}}
+    """
+    r = {}
+    for k in gts.keys():
+        if isinstance(gts[k], dict):
+            r[k] = prune(gts[k], *keys)
+        elif isinstance(gts[k], (list, tuple)):
+            r[k] = [dict([(sk, i[sk]) for sk in i.keys() if sk not in keys])
+                    for i in gts[k]]
+    return r
+
+
+def pick(gts, key, default=None):
+    """
+    Reduce leaf nodes from dicts to single values (leaf.get(key, default))
+
+    key : string
+        leaf key used to unlock return values
+
+    default : var [default: None]
+        value to use if key is not in leaf.keys()
+
+
+    Example
+    ------
+    trim({'a': {'b': [{'a': 1, 'b': 2, 'c': 3}]}}, 'c') ==
+        {'a': {'b': [3]}}
+
+    """
+    r = {}
+    for k in gts.keys():
+        if isinstance(gts[k], dict):
+            r[k] = pick(gts[k], key)
+        elif isinstance(gts[k], (list, tuple)):
+            r[k] = [i.get(key, default) for i in gts[k]]
+    return r
+
+
+def test_pick():
+    d = {
+        'a': {'b': [{'a': 1, 'b': 2, 'c': 3}]},
+    }
+    tpa = {'a': {'b': [1]}}
+    tpb = {'a': {'b': [2]}}
+    tpd = {'a': {'b': [None]}}
+
+    pa = pick(d, 'a')
+    assert pa == tpa
+    pb = pick(d, 'b')
+    assert pb == tpb
+    pd = pick(d, 'd')
+    assert pd == tpd
+
+
+def test_prune():
+    d = {
+        'a': {'b': [{'a': 1, 'b': 2, 'c': 3}]},
+    }
+    tpa = {
+        'a': {'b': [{'b': 2, 'c': 3}]},
+    }
+    tpab = {
+        'a': {'b': [{'c': 3}]},
+    }
+
+    pa = prune(d, 'a')
+    assert pa == tpa
+
+    pab = prune(d, 'a', 'b')
+    assert pab == tpab
+
+
 def test_drop_levels():
     d = {
         'a': {'1': [1, ], '2': [2, ]},
