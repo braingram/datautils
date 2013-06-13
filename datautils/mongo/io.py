@@ -43,6 +43,8 @@ def write(d, pchar=','):
     elif isinstance(d, numpy.void):
         return dict([(k.replace('.', pchar), write(d[k]))
                      for k in d.dtype.names])
+    elif isinstance(d, Exception):
+        return str(d)
     return d
 
 
