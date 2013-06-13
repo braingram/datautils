@@ -25,7 +25,7 @@ def combine(d0, d1, r=None):
     if r is None:
         r = {}
     for k in set(d0.keys() + d1.keys()):
-        r[k] = combine(d0.get(k, {}), d1.get(k, {}))
+        r[k] = combine(d0.get(k, None), d1.get(k, None))
     return r
 
 
@@ -173,13 +173,16 @@ def pick(gts, key, default=None):
         {'a': {'b': [3]}}
 
     """
-    r = {}
-    for k in gts.keys():
-        if isinstance(gts[k], dict):
-            r[k] = pick(gts[k], key)
-        elif isinstance(gts[k], (list, tuple)):
-            r[k] = [i.get(key, default) for i in gts[k]]
-    return r
+    if isinstance(gts, dict):
+        r = {}
+        for k in gts.keys():
+            if isinstance(gts[k], dict):
+                r[k] = pick(gts[k], key)
+            elif isinstance(gts[k], (list, tuple)):
+                r[k] = [i.get(key, default) for i in gts[k]]
+        return r
+    elif isinstance(gts, (list, tuple)):
+        return [i.get(key, default) for i in gts]
 
 
 def stat(gts, func, pick_key=None):
