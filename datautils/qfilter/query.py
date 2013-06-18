@@ -7,6 +7,7 @@ I have not implemented the full set of mongodb queries [see vtests]
 
 #import collections
 import itertools
+import math
 
 from ..ddict import dget
 
@@ -38,6 +39,17 @@ def or_vtest(t):
 def and_vtest(t):
     tests = [make_value_test(i) for i in t]
     return lambda v: all([t(v) for t in tests])
+
+
+def eq(a, b):
+    # special case for nan
+    if math.isnan(a):
+        return math.isnan(b)
+    return a == b
+
+
+def neq(a, b):
+    return not eq(a, b)
 # for a given test value [t] construct a value test that when run on
 # a value [v] returns either True or False indicating if the value
 # passed the test
@@ -49,7 +61,7 @@ vtests = {
     #'$exists': make_exists_test(t, v),  # done elsewhere
     #'$mod': ???
     '$all': lambda t: lambda v: all((ti in v for ti in tuple(t))),
-    '$ne': lambda t: lambda v: v != t,
+    '$ne': lambda t: lambda v: neq(v, t),
     '$in': lambda t: lambda v: (any((vi in t for vi in v))) \
             if isinstance(v, (tuple, list)) \
             else (v in t),
@@ -64,7 +76,7 @@ vtests = {
     #'$elemMatch': ???
     '$elemMatch': elemMatch_vtest,
     '$not': not_vtest
-    }
+}
 
 
 def make_value_test(value):
@@ -72,7 +84,7 @@ def make_value_test(value):
     """
     if not isinstance(value, dict):
         return lambda v: value in v if isinstance(v, (tuple, list)) \
-                else v == value
+                else eq(v, value)
     # run all value tests, short-circuit on first False
     tests = [vtests[k](v) for k, v in value.iteritems()]
     return lambda v: all((t(v) for t in tests))
@@ -180,6 +192,11 @@ def test_qfilter():
     assert len(qfilter(items, {'a.b.c': {'$nin': [2, 3]}})) == 1
     assert len(qfilter(items, {'a.b.c': {'$nin': [1, 2, 3]}})) == 0
     assert len(qfilter(items, {'a.b.c': {'$nin': [1, 2]}})) == 0
+
+    # nan != nan corner case
+    nani = [{'a': 1}, {'a': float('nan')}]
+    assert len(qfilter(nani, {'a': float('nan')})) == 1
+    assert len(qfilter(nani, {'a': {'$ne': float('nan')}})) == 1
 
 
 def test():
