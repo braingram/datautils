@@ -31,15 +31,15 @@ Examples
 remap(docs, {'dest': 'mongo.key'})
 # [{'mongo.key': 1}, {'mongo.key': 2}] -> {'dest': [1, 2]}
 
-remap(docs, {'mongo.key': {'k': 'dest', 'f': numpy.mean}})
-remap(docs, {'dest': {'mon
+remap(docs, {'dest': {'k': 'mongo.key', 'f': numpy.mean}})
 # [{'mongo.key': 1}, {'mongo.key': 2}] -> {'dest': 1.5}
 
-remap(docs, {'mongo.key': {'k': 'dest', 'q': {'$lt': 1}}})
+remap(docs, {'dest': {'k': 'mongo.key', 'q': {'$lt': 1}}})
 # [{'mongo.key': 1}, {'mongo.key': 2}] -> {'dest': [2, ]}
 
 # not supported...
-remap(docs, {'mongo.key': {'k': 'dest', 'q': {'$gt': 2}, 'f': lambda x: x * 2})
+remap(docs, {'dest':
+    {'k': 'mongo.key', 'q': {'$gt': 2}, 'f': lambda x: x * 2}})
 # [{'mongo.key': 1}, {'mongo.key': 2}] -> {'dest': [4, ]}
 """
 
@@ -62,7 +62,8 @@ def parse_mapping(mapping):
     None of this works because it doesn't take into account that there might
     be multiple mappings for a single mongokey
     """
-    ss, qs, fs, fqs = {}, {}, {}, {}, {}
+    # dicts of key = destination key, value = query/mongo.key/function...
+    ss, qs, fs, fqs = {}, {}, {}, {}
     for k, v in mapping.iteritems():
         if isinstance(v, (str, unicode)):
             ss[k] = v
@@ -86,9 +87,9 @@ def parse_mapping(mapping):
         if 'q' in v:
             # query
             # if a query for this key already exists, add to it
-            qv = qs.get(k, {})
+            qv = qs.get(v['k'], {})
             qv.update(v['q'])
-            qs[k] = qv
+            qs[v['k']] = qv
             # also add a simple mapping, so filtered items will be saved
             ss[k] = v['k']
             continue
@@ -97,17 +98,30 @@ def parse_mapping(mapping):
     return ss, qs, fs, fqs
 
 
-def apply_functions(docs, fs):
-    r = {}
-    for (mk, v) in fs.iteritems():
-        rk = v['k']
-        f = v['f']([d[mk] for d in docs])
-    pass
+def apply_functions(docs, fs, rs=None):
+    if rs is None:
+        rs = [{} for _ in xrange(len(docs))]
+    for (rk, v) in fs.iteritems():
+        mk = v['k']
+        frs = v['f']([d[mk] for d in docs])
+        if hasattr(frs, '__len__') and (not isinstance(frs, (str, unicode))):
+            # if a sequence was returned
+            if len(frs) != len(rs):
+                raise MappingError(
+                    "Function(%s) result incorrect length [%s != %s]"
+                    % (v['k'], len(frs), len(rs)))
+            for i in xrange(len(frs)):
+                rs[i][rk] = frs[i]
+        else:
+            # if a single value was returned
+            for i in xrange(len(rs)):
+                rs[i][rk] = frs
+    return rs
 
 
-def remap(cursor, mapping):
+def remap(cursor, mapping, asdocs=True):
     docs = [ddict.DDict(d) for d in cursor]
-    ss, qs, fs, qfs, fqs = parse_mapping(mapping)
+    ss, qs, fs, fqs = parse_mapping(mapping)
     # first queries
     docs = qfilter.qfilter(docs, qs)
 
@@ -119,11 +133,18 @@ def remap(cursor, mapping):
     # then simple mapping
     rs = [{} for _ in xrange(len(docs))]
     for i in xrange(len(docs)):
-        for mk, rk in ss.iteritems():
+        for rk, mk in ss.iteritems():
             rs[i][rk] = docs[i][mk]
 
     # then functions
-    frs = apply_functions(docs, fs)
+    rs = apply_functions(docs, fs, rs)
+    if asdocs:
+        return rs
+    rd = dict([(k, []) for k in mapping.keys()])
+    for r in rs:
+        for k in r.keys():
+            rd[k].append(r[k])
+    return rd
 
 
-    pass
+def test_remap
