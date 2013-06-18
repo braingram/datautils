@@ -3,11 +3,14 @@
 import pylab
 
 from . import remap
+from .. import listify
 
 
 def pfunc(required=None, optional=None):
     required = [] if required is None else required
     optional = [] if optional is None else optional
+    required = listify(required)
+    optional = listify(optional)
 
     def wrapper(function):
         def wrapped(d, mapping, **kwargs):
@@ -39,35 +42,27 @@ def pfunc(required=None, optional=None):
 
 
 @pfunc(required=('left', 'height'))
-def w_bar(d, mapping, *args, **kwargs):
-    print mapping
+def bar(d, m, *args, **kwargs):
     ax = pylab.gca()
     return ax.bar(*args, **kwargs)
 
 
-def bar(d, mapping, **kwargs):
-    # bar(left, height, ...)
-    assert isinstance(mapping, dict)
-    mapping['left'] = mapping.get('left', 'left')
-    mapping['height'] = mapping.get('height', 'height')
-
-    if not isinstance(d, dict):
-        mapping = remap(d, mapping, asdocs=False)
-    else:
-        for k in mapping:
-            mapping[k] = d[mapping[k]]
-
-    left = mapping.pop('left')
-    height = mapping.pop('height')
-
-    kwargs.update(mapping)
+@pfunc(required=('bottom', 'width'))
+def barh(d, m, *args, **kwargs):
     ax = pylab.gca()
-    return ax.bar(left, height, **kwargs)
+    return ax.barh(*args, **kwargs)
 
 
-# barh(bottom, width, ...)
-# errorbar(x, y, {yerr}, {xerr}, ...)
-# hist(x, ...)
+@pfunc(required=('x', 'y'))
+def errorbar(d, m, *args, **kwargs):
+    ax = pylab.gca()
+    return ax.errorbar(*args, **kwargs)
+
+
+@pfunc(required='x')
+def hist(d, m, *args, **kwargs):
+    ax = pylab.gca()
+    return ax.hist(*args, **kwargs)
 
 
 def plot(d, mapping, **kwargs):
