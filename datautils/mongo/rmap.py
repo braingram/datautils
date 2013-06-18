@@ -98,28 +98,14 @@ def parse_mapping(mapping):
     return ss, qs, fs, fqs
 
 
-def apply_functions(docs, fs, rs=None):
-    if rs is None:
-        rs = [{} for _ in xrange(len(docs))]
+def apply_functions(docs, fs):
+    rs = {}
     for (rk, v) in fs.iteritems():
-        mk = v['k']
-        frs = v['f']([d[mk] for d in docs])
-        if hasattr(frs, '__len__') and (not isinstance(frs, (str, unicode))):
-            # if a sequence was returned
-            if len(frs) != len(rs):
-                raise MappingError(
-                    "Function(%s) result incorrect length [%s != %s]"
-                    % (v['k'], len(frs), len(rs)))
-            for i in xrange(len(frs)):
-                rs[i][rk] = frs[i]
-        else:
-            # if a single value was returned
-            for i in xrange(len(rs)):
-                rs[i][rk] = frs
+        rs[rk] = v['f']([d[v['k']] for d in docs])
     return rs
 
 
-def remap(cursor, mapping, asdocs=True):
+def remap(cursor, mapping, asdocs=False):
     docs = [ddict.DDict(d) for d in cursor]
     ss, qs, fs, fqs = parse_mapping(mapping)
     # first queries
@@ -137,14 +123,51 @@ def remap(cursor, mapping, asdocs=True):
             rs[i][rk] = docs[i][mk]
 
     # then functions
-    rs = apply_functions(docs, fs, rs)
+    frs = apply_functions(docs, fs)  # returns dict
     if asdocs:
+        for fk, fv in frs.iteritems():
+            if hasattr(fv, '__len__') and (not isinstance(fv, (str, unicode))):
+                if len(rs) != len(fv):
+                    raise MappingError(
+                        "Function [%s] result length [%s] != doc length [%s]"
+                        % (fk, len(fv), len(rs)))
+                for i in xrange(len(rs)):
+                    rs[i][fk] = fv[i]
+            else:  # single value
+                for i in xrange(len(rs)):
+                    rs[i][fk] = fv
         return rs
-    rd = dict([(k, []) for k in mapping.keys()])
+
+    # pull out items from rs put them in frs
+    rd = dict([(k, []) for k in mapping.keys() if k not in frs.keys()])
+    for k, v in frs.iteritems():
+        rd[k] = v
     for r in rs:
         for k in r.keys():
             rd[k].append(r[k])
     return rd
 
 
-def test_remap
+def test_remap():
+    l = [{'a': 1, 'b': 1}, {'a': 2, 'b': 2}]
+    m = {
+        'c': 'a',
+        'd': {'k': 'a', 'f': lambda x: [i * 2 for i in x]},
+        'e': {'k': 'b', 'q': {'$gt': 1}},
+    }
+    r = remap(l, m, asdocs=True)
+    assert len(r) == 1  # query
+    assert r[0]['c'] == l[1]['a']  # simple
+    assert r[0]['d'] == (l[1]['a'] * 2)  # func
+    assert r[0]['e'] == l[1]['b']  # query
+
+    rd = remap(l, m, asdocs=False)
+    assert len(rd['c']) == 1
+    assert rd['c'][0] == l[1]['a']
+    assert rd['d'][0] == (l[1]['a'] * 2)
+    assert rd['e'][0] == l[1]['b']
+
+    # test functions returning single values
+    m = {'a': {'k': 'a', 'f': lambda x: sum(x) / float(len(x))}}
+    rs = remap(l, m, asdocs=False)
+    assert rs['a'] == 1.5
