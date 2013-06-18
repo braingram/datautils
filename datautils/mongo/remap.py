@@ -29,11 +29,10 @@ Examples
 ------
 
 remap(docs, {'dest': 'mongo.key'})
-
-remap(docs, {'mongo.key': 'dest'})
 # [{'mongo.key': 1}, {'mongo.key': 2}] -> {'dest': [1, 2]}
 
 remap(docs, {'mongo.key': {'k': 'dest', 'f': numpy.mean}})
+remap(docs, {'dest': {'mon
 # [{'mongo.key': 1}, {'mongo.key': 2}] -> {'dest': 1.5}
 
 remap(docs, {'mongo.key': {'k': 'dest', 'q': {'$lt': 1}}})
