@@ -65,50 +65,29 @@ def hist(d, m, *args, **kwargs):
     return ax.hist(*args, **kwargs)
 
 
-def plot(d, mapping, **kwargs):
-    assert isinstance(mapping, dict)
-    if len(mapping) == 0:
-        mapping = dict(x='x')
-
-    if not isinstance(d, dict):
-        mapping = remap(d, mapping, asdocs=False)
-    else:
-        for k in mapping:
-            mapping[k] = d[mapping[k]]
-
-    args = [mapping.pop('x'), ]
-    if 'y' in mapping:
-        args.append(mapping.pop('y'))
-    if 'fmt' in mapping:
-        args.append(mapping.pop('fmt'))
-
+@pfunc(required='x', optional=('y', 'fmt'))
+def plot(d, m, *args, **kwargs):
     ax = pylab.gca()
-    kwargs.update(mapping)
     return ax.plot(*args, **kwargs)
 
 
-def scatter(d, mapping, **kwargs):
-    assert isinstance(mapping, dict)
-    mapping['x'] = mapping.get('x', 'x')
-    mapping['y'] = mapping.get('y', 'y')
-
-    if not isinstance(d, dict):
-        mapping = remap(d, mapping, asdocs=False)
-    else:
-        for k in mapping:
-            mapping[k] = d[mapping[k]]
-
-    x = mapping.pop('x')
-    y = mapping.pop('y')
-
-    kwargs.update(mapping)
+@pfunc(required=('x', 'y'))
+def scatter(d, m, *args, **kwargs):
     ax = pylab.gca()
-    ax.scatter(x, y, **kwargs)
+    return ax.scatter(*args, **kwargs)
 
 
-# boxplot(x, ...)
+@pfunc(required='x')
+def boxplot(d, m, *args, **kwargs):
+    ax = pylab.gca()
+    return ax.boxplot(*args, **kwargs)
 
-# axhline(y, ...)
+
+@pfunc(required='y')
+def axhline(d, m, *args, **kwargs):
+    ax = pylab.gca()
+    return ax.axhline(*args, **kwargs)
+
 # axvline(x, ...)
 # axhspan(ymin, ymax, ...)
 # axvspan(xmin, xmax, ...)
