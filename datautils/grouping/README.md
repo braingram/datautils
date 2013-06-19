@@ -61,7 +61,7 @@ Useful functions
 Examples
 ======
 
-see test_<function> (several in ops) for more examples
+see test functions (several in ops) for more examples
 
 ```python
 from datautils import grouping
