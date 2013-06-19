@@ -4,6 +4,7 @@ from ..listify import listify
 
 
 def depth(d, l=0):
+    """Measure grouping depth [how nested is this dict?]"""
     if isinstance(d, dict):
         if not len(d.values()):
             return l
@@ -14,6 +15,17 @@ def depth(d, l=0):
 
 
 def combine(d0, d1, r=None):
+    """
+    Combine two groupings
+
+    Take two groupings (nested dicts) and combine them so that:
+        - sub-dictionaries (dicts at some key) are combined
+        - lists of grouped values are extended together
+            ([1, 2] + [3, 4] = [1, 2, 3, 4])
+
+    This can be though of as taking two trees and adding
+    together all the leaves.
+    """
     if d0 is None:
         return d1
     if d1 is None:
