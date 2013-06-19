@@ -6,11 +6,62 @@ from . import remap
 from .. import listify
 
 
-def pfunc(required=None, optional=None, auto=True):
+def pfunc(required=None, optional=None, auto=True, shadowkwargs=None):
+    """
+    Wrap a plotting function to allow for data parsing and mapping.
+    The wrapped functions must accept the following arguments:
+        wrapped(data, mapping, *args, **kwargs)
+
+    Where...
+        data : data to be plotted, list of dicts, or dict
+
+        mapping : mapping dictionary [see remap]
+
+        *args : variable arguments parsed from data [see required and optional]
+
+        **kwargs : keyword arguments parsed from data and from
+            the function call
+
+
+    Decorator kwargs
+    ------
+
+    required : list (or single name)
+        required non-keyword arguments to wrapped function
+
+    optional : list (or single name)
+        optional non-keyword arguments to wrapped function
+
+    auto : bool [default = True]
+        auto call function by using the name of the wrapped function
+            getattr(pylab, function.__name__)
+
+    shadowkwargs : list (or single name)
+        do not pass on these kwargs to the auto called function
+
+
+    Examples
+    ------
+
+    # auto call example
+    @pfunc(required='x', optional=('y', 'fmt'))
+    def plot(d, m, *args, **kwargs):
+        # pylab.plot(*args, **kwargs) will be auto called
+        return
+
+    # shadowkwargs example
+    @pfunc(required='x', shadowkwargs='blah')
+    def plot(d, m, *args, **kwargs):
+        # pylab.plot(*args, **kwargs) will be called without kwargs['blah']
+        assert 'blah' in kwargs
+        # However, this function can have a kwargs['blah']
+    """
     required = [] if required is None else required
     optional = [] if optional is None else optional
+    shadowkwargs = [] if shadowkwargs is None else shadowkwargs
     required = listify(required)
     optional = listify(optional)
+    shadowkwargs = listify(shadowkwargs)
 
     def wrapper(function):
         if not hasattr(pylab, function.__name__):
@@ -38,13 +89,17 @@ def pfunc(required=None, optional=None, auto=True):
                     args.append(mapping.pop(o))
             kwargs.update(mapping)
 
+            skwargs = dict([(k, kwargs.pop(k)) for k in shadowkwargs])
+
             if auto:
                 f = getattr(pylab, function.__name__)
-                print args, kwargs
                 ar = f(*args, **kwargs)
             else:
                 ar = None
+
+            kwargs.update(skwargs)
             fr = function(d, mapping_copy, *args, **kwargs)
+
             if ar is None:
                 return fr
             if fr is None:
@@ -135,3 +190,5 @@ def hlines(d, m, *args, **kwargs):
 @pfunc(required=('x', 'ymin', 'ymax'))
 def vlines(d, m, *args, **kwargs):
     return
+
+# TODO 3D
