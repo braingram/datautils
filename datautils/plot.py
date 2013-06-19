@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import pylab
+import mpl_toolkits.mplot3d as mplot3d
 
 from . import remap
 from . import listify
@@ -64,7 +65,7 @@ def pfunc(required=None, optional=None, auto=True, shadowkwargs=None):
     shadowkwargs = listify(shadowkwargs)
 
     def wrapper(function):
-        if not hasattr(pylab, function.__name__):
+        if auto and not hasattr(pylab, function.__name__):
             raise AttributeError(
                 "Autocall failed, pylab has no: %s" %
                 function.__name__)
@@ -191,4 +192,75 @@ def hlines(d, m, *args, **kwargs):
 def vlines(d, m, *args, **kwargs):
     return
 
-# TODO 3D
+
+# ======= 3D =======
+def get_3d_axes():
+    ax = pylab.gca()
+    if not isinstance(ax, mplot3d.Axes3D):
+        # remove axis from plot
+        axg = ax.get_geometry()
+        # replace with a 3d projected one
+        f = pylab.gcf()
+        f.delaxes(ax)
+        ax = f.add_subplot(*axg, projection='3d')
+    return ax
+
+
+@pfunc(required=('x', 'y'), auto=False)
+def plot3d(d, m, *args, **kwargs):
+    ax = get_3d_axes()
+    return ax.plot(*args, **kwargs)
+
+
+@pfunc(required=('x', 'y'), auto=False)
+def scatter3d(d, m, *args, **kwargs):
+    ax = get_3d_axes()
+    return ax.scatter(*args, **kwargs)
+
+
+@pfunc(required=('x', 'y', 'z'), auto=False)
+def wireframe3d(d, m, *args, **kwargs):
+    ax = get_3d_axes()
+    return ax.plot_wireframe(*args, **kwargs)
+
+
+@pfunc(required=('x', 'y', 'z'), auto=False)
+def surface3d(d, m, *args, **kwargs):
+    ax = get_3d_axes()
+    return ax.plot_surface(*args, **kwargs)
+
+
+@pfunc(required=('x', 'y', 'z'), auto=False)
+def trisurf3d(d, m, *args, **kwargs):
+    ax = get_3d_axes()
+    return ax.plot_trisurf(*args, **kwargs)
+
+
+@pfunc(required=('x', 'y', 'z'), auto=False)
+def contour3d(d, m, *args, **kwargs):
+    ax = get_3d_axes()
+    return ax.contour(*args, **kwargs)
+
+
+@pfunc(required=('x', 'y', 'z'), auto=False)
+def contourf3d(d, m, *args, **kwargs):
+    ax = get_3d_axes()
+    return ax.contourf(*args, **kwargs)
+
+
+@pfunc(required='col', auto=False)
+def collection3d(d, m, *args, **kwargs):
+    ax = get_3d_axes()
+    return ax.add_collection3d(*args, **kwargs)
+
+
+@pfunc(required=('left', 'height'), auto=False)
+def bar3d(d, m, *args, **kwargs):
+    ax = get_3d_axes()
+    return ax.bar3d(*args, **kwargs)
+
+
+@pfunc(required=('x', 'y', 'z', 's'), auto=False)
+def text3d(d, m, *args, **kwargs):
+    ax = get_3d_axes()
+    return ax.text3d(*args, **kwargs)
