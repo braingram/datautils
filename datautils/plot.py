@@ -32,6 +32,7 @@ def pfunc(required=None, optional=None, auto=True, shadowkwargs=None):
 
     optional : list (or single name)
         optional non-keyword arguments to wrapped function
+        these must be defined in the mapping
 
     auto : bool [default = True]
         auto call function by using the name of the wrapped function
@@ -206,14 +207,15 @@ def get_3d_axes():
     return ax
 
 
-@pfunc(required=('x', 'y'), auto=False)
+@pfunc(required=('x', 'y'), optional='z', auto=False)
 def plot3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
     return ax.plot(*args, **kwargs)
 
 
-@pfunc(required=('x', 'y'), auto=False)
+@pfunc(required=('x', 'y'), optional='z', auto=False)
 def scatter3d(d, m, *args, **kwargs):
+    print args, kwargs
     ax = get_3d_axes()
     return ax.scatter(*args, **kwargs)
 
@@ -254,7 +256,7 @@ def collection3d(d, m, *args, **kwargs):
     return ax.add_collection3d(*args, **kwargs)
 
 
-@pfunc(required=('left', 'height'), auto=False)
+@pfunc(required=('left', 'height'), optional='zs', auto=False)
 def bar3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
     return ax.bar3d(*args, **kwargs)
