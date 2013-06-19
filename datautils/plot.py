@@ -3,7 +3,7 @@
 import pylab
 
 from . import remap
-from .. import listify
+from . import listify
 
 
 def pfunc(required=None, optional=None, auto=True, shadowkwargs=None):

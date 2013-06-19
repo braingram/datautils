@@ -43,8 +43,8 @@ remap(docs, {'dest':
 # [{'mongo.key': 1}, {'mongo.key': 2}] -> {'dest': [4, ]}
 """
 
-from .. import ddict
-from .. import qfilter
+from . import ddict
+from . import qfilter
 
 
 class MappingError(Exception):
