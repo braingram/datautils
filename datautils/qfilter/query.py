@@ -43,8 +43,8 @@ def and_vtest(t):
 
 def eq(a, b):
     # special case for nan
-    if math.isnan(a):
-        return math.isnan(b)
+    if isinstance(a, float) and math.isnan(a):
+        return isinstance(b, float) and math.isnan(b)
     return a == b
 
 
