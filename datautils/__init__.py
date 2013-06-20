@@ -15,7 +15,7 @@ __all__ = ['listify', 'qf', 'remap']
 
 try:
     from .import mongo
-except ImportError:
+except ImportError as E:
     warnings.warn('datautils.mongo failed to import with: %S' % E)
 
 try:
