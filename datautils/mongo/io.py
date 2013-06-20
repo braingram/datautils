@@ -5,7 +5,10 @@ import cPickle as pickle
 
 import numpy
 import pymongo
-import pymongo.binary
+try:
+    import pymongo.binary as binary
+except ImportError:
+    import bson.binary as binary
 
 from .. import ddict
 
@@ -28,7 +31,7 @@ def write(d, pchar=','):
     elif isinstance(d, numpy.ndarray):
         if d.dtype.isbuiltin == 0:  # this is a structured array
             # pickle it
-            return pymongo.binary.Binary(pickle.dumps(d, protocol=2))
+            return binary.Binary(pickle.dumps(d, protocol=2))
         elif d.dtype.isbuiltin == 1:  # this is built in make it a list
             # should I pickle these too?
             return write(list(d))
@@ -56,6 +59,6 @@ def read(d, dclass=ddict.DDict):
         return dclass([(k, read(v)) for (k, v) in d.iteritems()])
     elif isinstance(d, (list, tuple)):
         return type(d)([read(v) for v in d])
-    elif isinstance(d, pymongo.binary.Binary):
+    elif isinstance(d, binary.Binary):
         return pickle.loads(d)
     return d
