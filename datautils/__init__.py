@@ -16,7 +16,7 @@ __all__ = ['listify', 'qf', 'remap']
 try:
     from .import mongo
 except ImportError as E:
-    warnings.warn('datautils.mongo failed to import with: %S' % E)
+    warnings.warn('datautils.mongo failed to import with: %s' % E)
 
 try:
     from .import np
