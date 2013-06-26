@@ -11,6 +11,7 @@ from .listify import listify
 from .qfilter import qf
 from .rmap import remap
 
+__version__ = '1.0.1'
 __all__ = ['listify', 'qf', 'remap']
 
 try:
