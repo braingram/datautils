@@ -102,7 +102,7 @@ def groupn(values, keys=None, levels=None, gtypes=None, gkwargs=None,
     if isinstance(gtypes, str) or (not hasattr(gtypes, '__len__')):
         gtypes = [gtypes] * nlvls
 
-    if (gkwargs is None) or (isinstance(gkwargs), dict):
+    if (gkwargs is None) or (isinstance(gkwargs, dict)):
         gkwargs = [gkwargs] * nlvls
 
     for i in (keys, levels, gtypes, gkwargs):
