@@ -60,7 +60,7 @@ def pfunc(required=None, optional=None, auto=True, shadowkwargs=None):
     """
     required = [] if required is None else required
     optional = [] if optional is None else optional
-    shadowkwargs = [] if shadowkwargs is None else shadowkwargs
+    shadowkwargs = ['decorate', ] if shadowkwargs is None else shadowkwargs
     required = listify(required)
     optional = listify(optional)
     shadowkwargs = listify(shadowkwargs)
@@ -91,7 +91,8 @@ def pfunc(required=None, optional=None, auto=True, shadowkwargs=None):
                     args.append(mapping.pop(o))
             kwargs.update(mapping)
 
-            skwargs = dict([(k, kwargs.pop(k)) for k in shadowkwargs])
+            skwargs = dict([(k, kwargs.pop(k)) for k in shadowkwargs
+                            if k in kwargs])
 
             if auto:
                 f = getattr(pylab, function.__name__)
@@ -114,83 +115,132 @@ def pfunc(required=None, optional=None, auto=True, shadowkwargs=None):
     return wrapper
 
 
+def read_key(k):
+    if isinstance(k, dict):
+        return k['k']
+    return k
+
+
 @pfunc(required=('left', 'height'))
 def bar(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.xlabel(read_key(m['left']))
+        pylab.ylabel(read_key(m['height']))
     return
 
 
 @pfunc(required=('bottom', 'width'))
 def barh(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.xlabel(read_key(m['width']))
+        pylab.ylabel(read_key(m['bottom']))
     return
 
 
 @pfunc(required=('x', 'y'))
 def errorbar(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.xlabel(read_key(m['x']))
+        pylab.ylabel(read_key(m['y']))
     return
 
 
 @pfunc(required='x')
 def hist(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.xlabel(read_key(m['x']))
     return
 
 
 @pfunc(required='x', optional=('y', 'fmt'))
 def plot(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.xlabel(read_key(m['x']))
+        if 'y' in m:
+            pylab.ylabel(read_key(m['y']))
     return
 
 
 @pfunc(required=('x', 'y'))
 def scatter(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.xlabel(read_key(m['x']))
+        pylab.ylabel(read_key(m['y']))
     return
 
 
 @pfunc(required='x')
 def boxplot(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.xlabel(read_key(m['x']))
     return
 
 
 @pfunc(required='y')
 def axhline(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.ylabel(read_key(m['y']))
     return
 
 
 @pfunc(required='x')
 def axvline(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.xlabel(read_key(m['x']))
     return
 
 
 @pfunc(required=('ymin', 'ymax'))
 def axhspan(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.ylabel(read_key(m['ymin']))
     return
 
 
 @pfunc(required=('xmin', 'xmax'))
 def axvspan(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.xlabel(read_key(m['xmin']))
     return
 
 
 @pfunc(required=('x', 'y'), optional='c')
 def fill(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.xlabel(read_key(m['x']))
+        pylab.ylabel(read_key(m['y']))
     return
 
 
 @pfunc(required=('x', 'y1'))
 def fill_between(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.xlabel(read_key(m['x']))
+        pylab.ylabel(read_key(m['y1']))
     return
 
 
 @pfunc(required=('y', 'x1'))
 def fill_betweenx(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.xlabel(read_key(m['x1']))
+        pylab.ylabel(read_key(m['y']))
     return
 
 
 @pfunc(required=('y', 'xmin', 'xmax'))
 def hlines(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.xlabel(read_key(m['xmin']))
+        pylab.ylabel(read_key(m['y']))
     return
 
 
 @pfunc(required=('x', 'ymin', 'ymax'))
 def vlines(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        pylab.xlabel(read_key(m['x']))
+        pylab.ylabel(read_key(m['ymin']))
     return
 
 
@@ -210,43 +260,72 @@ def get_3d_axes():
 @pfunc(required=('x', 'y'), optional='z', auto=False)
 def plot3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    if kwargs.pop('decorate', False):
+        ax.set_xlabel(read_key(m['x']))
+        ax.set_ylabel(read_key(m['y']))
+        if 'z' in m:
+            ax.set_zlabel(read_key(m['z']))
     return ax.plot(*args, **kwargs)
 
 
 @pfunc(required=('x', 'y'), optional='z', auto=False)
 def scatter3d(d, m, *args, **kwargs):
-    print args, kwargs
     ax = get_3d_axes()
+    if kwargs.pop('decorate', False):
+        ax.set_xlabel(read_key(m['x']))
+        ax.set_ylabel(read_key(m['y']))
+        if 'z' in m:
+            ax.set_zlabel(read_key(m['z']))
     return ax.scatter(*args, **kwargs)
 
 
 @pfunc(required=('x', 'y', 'z'), auto=False)
 def wireframe3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    if kwargs.pop('decorate', False):
+        ax.set_xlabel(read_key(m['x']))
+        ax.set_ylabel(read_key(m['y']))
+        ax.set_zlabel(read_key(m['z']))
     return ax.plot_wireframe(*args, **kwargs)
 
 
 @pfunc(required=('x', 'y', 'z'), auto=False)
 def surface3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    if kwargs.pop('decorate', False):
+        ax.set_xlabel(read_key(m['x']))
+        ax.set_ylabel(read_key(m['y']))
+        ax.set_zlabel(read_key(m['z']))
     return ax.plot_surface(*args, **kwargs)
 
 
 @pfunc(required=('x', 'y', 'z'), auto=False)
 def trisurf3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    if kwargs.pop('decorate', False):
+        ax.set_xlabel(read_key(m['x']))
+        ax.set_ylabel(read_key(m['y']))
+        ax.set_zlabel(read_key(m['z']))
     return ax.plot_trisurf(*args, **kwargs)
 
 
 @pfunc(required=('x', 'y', 'z'), auto=False)
 def contour3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    if kwargs.pop('decorate', False):
+        ax.set_xlabel(read_key(m['x']))
+        ax.set_ylabel(read_key(m['y']))
+        ax.set_zlabel(read_key(m['z']))
     return ax.contour(*args, **kwargs)
 
 
 @pfunc(required=('x', 'y', 'z'), auto=False)
 def contourf3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    if kwargs.pop('decorate', False):
+        ax.set_xlabel(read_key(m['x']))
+        ax.set_ylabel(read_key(m['y']))
+        ax.set_zlabel(read_key(m['z']))
     return ax.contourf(*args, **kwargs)
 
 
@@ -259,10 +338,19 @@ def collection3d(d, m, *args, **kwargs):
 @pfunc(required=('left', 'height'), optional='zs', auto=False)
 def bar3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    if kwargs.pop('decorate', False):
+        ax.set_xlabel(read_key(m['left']))
+        ax.set_ylabel(read_key(m['height']))
+        if 'zs' in m:
+            ax.set_zlabel(read_key(m['zs']))
     return ax.bar3d(*args, **kwargs)
 
 
 @pfunc(required=('x', 'y', 'z', 's'), auto=False)
 def text3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    if kwargs.pop('decorate', False):
+        ax.set_xlabel(read_key(m['x']))
+        ax.set_ylabel(read_key(m['y']))
+        ax.set_zlabel(read_key(m['z']))
     return ax.text3d(*args, **kwargs)
