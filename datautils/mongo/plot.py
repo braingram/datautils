@@ -10,11 +10,30 @@ Plot recording locations
     - x = ct, y = cr
 """
 
+import re
+
 import pylab
 import pymongo
 
-import datautils
 import qarg
+
+from .. import np
+from ..plot import mapped
+
+
+def parse_opts(opts):
+    """
+    code(foo) : code foo (useful for plotting lists of strings
+
+    -- planned --
+    numpy.bar(foo) : call a numpy function on foo
+    """
+    for k in opts:
+        # check code(foo)
+        m = re.findall('^code\((.*)\)$', opts[k])
+        if m:
+            opts[k] = {'k': m[0], 'f': np.convert.code}
+    return opts
 
 
 def plot(args=None, **kwargs):
@@ -76,11 +95,17 @@ def plot(args=None, **kwargs):
 
     collection = pymongo.Connection(host)[database][collection]
 
-    mask = dict([(k, True) for k in opts.values()])
+    opts = parse_opts(opts)
+    mask = {}
+    for k in opts:
+        if isinstance(opts[k], dict):
+            mask[opts[k]['k']] = True
+        else:
+            mask[opts[k]] = True
 
     data = [d for d in collection.find({}, mask)]
 
-    f = getattr(datautils.plot.mapped, ptype)
+    f = getattr(mapped, ptype)
 
     f(data, opts, decorate=True)
 
