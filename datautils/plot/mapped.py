@@ -3,8 +3,9 @@
 import pylab
 import mpl_toolkits.mplot3d as mplot3d
 
-from .. import remap
+from .. import grouping
 from .. import listify
+from .. import remap
 
 
 def pfunc(required=None, optional=None, auto=True, shadowkwargs=None):
@@ -60,7 +61,8 @@ def pfunc(required=None, optional=None, auto=True, shadowkwargs=None):
     """
     required = [] if required is None else required
     optional = [] if optional is None else optional
-    shadowkwargs = ['decorate', ] if shadowkwargs is None else shadowkwargs
+    shadowkwargs = ['decorate', 'xt', 'xtl', 'yt', 'ytl', 'zt', 'ztl'] if \
+        shadowkwargs is None else shadowkwargs
     required = listify(required)
     optional = listify(optional)
     shadowkwargs = listify(shadowkwargs)
@@ -128,6 +130,22 @@ def decorate(ax, d, m, **kwargs):
         ax.set_ylabel(read_key(m[kwargs['y']]))
     if 'z' in kwargs:
         ax.set_zlabel(read_key(m[kwargs['z']]))
+    if any([k in ('xt', 'xtl', 'yt', 'ytl', 'zt', 'ztl') for k in m]):
+        rm = remap(d, m, asdocs=False)
+    else:
+        return
+    if 'xt' in m:
+        ax.set_xticks(rm['xt'])
+    if 'xtl' in m:
+        ax.set_xticklabels(rm['xtl'])
+    if 'yt' in m:
+        ax.set_yticks(rm['yt'])
+    if 'ytl' in m:
+        ax.set_yticklabels(rm['ytl'])
+    if 'zt' in m:
+        ax.set_zticks(rm['zt'])
+    if 'ztl' in m:
+        ax.set_zticklabels(rm['ztl'])
 
 
 @pfunc(required=('left', 'height'))
@@ -142,6 +160,24 @@ def barh(d, m, *args, **kwargs):
     if kwargs.get('decorate', False):
         decorate(pylab.gca(), d, m, x='width', y='bottom')
     return
+
+
+@pfunc(required=('x'), auto=False)
+def bin(d, m, *args, **kwargs):
+    ax = pylab.gca()
+    g = grouping.group(args[0], gtype='d')  # thing to group
+    lefts = [i for i in range(len(g))]
+    labels = sorted(g.keys())
+    values = [len(g[k]) for k in labels]
+    r = ax.bar(lefts, values)
+    if kwargs.get('decorate', False):
+        decorate(ax, d, m, x='x')
+    # make xticks & xticklabels if they're not defined
+    if 'xt' not in m:
+        ax.set_xticks([i + 0.5 for i in lefts])
+    if 'xtl' not in m:
+        ax.set_xticklabels(labels)
+    return r
 
 
 @pfunc(required=('x', 'y'))

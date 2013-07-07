@@ -12,6 +12,7 @@ Plot recording locations
 
 import re
 
+import numpy
 import pylab
 import pymongo
 
@@ -33,6 +34,11 @@ def parse_opts(opts):
         m = re.findall('^code:(.*)$', opts[k])
         if m:
             opts[k] = {'k': m[0], 'f': np.convert.code}
+            continue
+        m = re.findall('^codes:(.*)$', opts[k])
+        if m:
+            opts[k] = {'k': m[0], 'f': numpy.unique}
+            continue
     return opts
 
 
