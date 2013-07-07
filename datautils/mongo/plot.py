@@ -66,6 +66,9 @@ def plot(args=None, **kwargs):
 
     collection : string
         mongodb collection to query
+
+    query : dict
+        query to issue to collection
     """
     _, opts = qarg.simple.parse(args)
 
@@ -95,6 +98,9 @@ def plot(args=None, **kwargs):
 
     collection = pymongo.Connection(host)[database][collection]
 
+    query = kwargs.get('query', {})
+    query.update(opts.pop('query', {}))
+
     opts = parse_opts(opts)
     mask = {}
     for k in opts:
@@ -103,7 +109,7 @@ def plot(args=None, **kwargs):
         else:
             mask[opts[k]] = True
 
-    data = [d for d in collection.find({}, mask)]
+    data = [d for d in collection.find(query, mask)]
 
     f = getattr(mapped, ptype)
 
