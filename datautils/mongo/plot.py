@@ -30,7 +30,7 @@ def parse_opts(opts):
     """
     for k in opts:
         # check code(foo)
-        m = re.findall('^code\((.*)\)$', opts[k])
+        m = re.findall('^code:(.*)$', opts[k])
         if m:
             opts[k] = {'k': m[0], 'f': np.convert.code}
     return opts
