@@ -10,9 +10,8 @@ Plot recording locations
     - x = ct, y = cr
 """
 
-import re
+#import re
 
-import numpy
 import pylab
 import pymongo
 
@@ -30,15 +29,10 @@ def parse_opts(opts):
     numpy.bar(foo) : call a numpy function on foo
     """
     for k in opts:
-        # check code(foo)
-        m = re.findall('^code:(.*)$', opts[k])
-        if m:
-            opts[k] = {'k': m[0], 'f': np.convert.code}
-            continue
-        m = re.findall('^codes:(.*)$', opts[k])
-        if m:
-            opts[k] = {'k': m[0], 'f': numpy.unique}
-            continue
+        if ':' in opts[k]:
+            f, sk = opts[k].split(':')
+            f = np.flookup.lookup(f)
+            opts[k] = {'k': sk, 'f': f}
     return opts
 
 
@@ -78,33 +72,33 @@ def plot(args=None, **kwargs):
     """
     _, opts = qarg.simple.parse(args)
 
-    save = kwargs.get('save', False)
+    save = kwargs.pop('save', False)
     #save = opts.pop('S', save)
     save = opts.pop('save', save)
 
-    hide = kwargs.get('hide', False)
+    hide = kwargs.pop('hide', False)
     #hide = opts.pop('H', hide)
     hide = opts.pop('hide', hide)
 
-    ptype = kwargs.get('ptype', 'scatter')
+    ptype = kwargs.pop('ptype', 'scatter')
     #ptype = opts.pop('T', ptype)
     ptype = opts.pop('ptype', ptype)
 
-    host = kwargs.get('host', None)
+    host = kwargs.pop('host', None)
     #host = opts.pop('H', host)
     host = opts.pop('host', host)
 
-    database = kwargs.get('database', None)
+    database = kwargs.pop('database', None)
     #database = opts.pop('D', database)
     database = opts.pop('database', database)
 
-    collection = kwargs.get('collection', None)
+    collection = kwargs.pop('collection', None)
     #collection = opts.pop('C', collection)
     collection = opts.pop('collection', collection)
 
     collection = pymongo.Connection(host)[database][collection]
 
-    query = kwargs.get('query', {})
+    query = kwargs.pop('query', {})
     query.update(opts.pop('query', {}))
 
     opts = parse_opts(opts)
@@ -119,7 +113,7 @@ def plot(args=None, **kwargs):
 
     f = getattr(mapped, ptype)
 
-    f(data, opts, decorate=True)
+    f(data, opts, decorate=True, **kwargs)
 
     if save:
         pylab.savefig(save)
