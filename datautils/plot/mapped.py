@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
+import numpy
 import pylab
 import mpl_toolkits.mplot3d as mplot3d
 
 from .. import grouping
 from .. import listify
+from .. import np
 from .. import remap
 
 
@@ -162,16 +164,23 @@ def barh(d, m, *args, **kwargs):
     return
 
 
-@pfunc(required=('x'), auto=False)
+@pfunc(required=('x'), optional='y', auto=False)
 def bin(d, m, *args, **kwargs):
     ax = pylab.gca()
     g = grouping.group(args[0], gtype='d')  # thing to group
     lefts = [i for i in range(len(g))]
     labels = sorted(g.keys())
-    values = [len(g[k]) for k in labels]
+    if len(args) == 1:
+        values = [len(g[k]) for k in labels]
+    elif len(args) > 1:  # a y was provided
+        stat = np.flookup.lookup(kwargs.get('stat', 'mean'))
+        d = np.convert.labeled_array(x=args[0], y=args[1])
+        values = []
+        for l in labels:
+            values.append(stat(d[d['x'] == l]['y']))
     r = ax.bar(lefts, values)
     if kwargs.get('decorate', False):
-        decorate(ax, d, m, x='x')
+        decorate(ax, d, m, x='x', y='y')
     # make xticks & xticklabels if they're not defined
     if 'xt' not in m:
         ax.set_xticks([i + 0.5 for i in lefts])
