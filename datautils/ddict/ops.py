@@ -69,6 +69,10 @@ def tget(d, k, default=None, delimiter=None):
         return default
 
 
+def tdget(d, k, default=None):
+    return tget(d, k, default, '.')
+
+
 # ------------------ tests ------------------
 def test_rget():
     d = {'a': {'b': {'c': 1}}}
