@@ -13,8 +13,6 @@ def finite(v):
 
 
 def finitemean(v):
-    print finite(v)
-    print numpy.mean(finite(v))
     return numpy.mean(finite(v))
 
 
