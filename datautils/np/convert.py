@@ -61,19 +61,56 @@ def labeled_array(**kwargs):
     return ordered_labeled_array(*[(k, kwargs[k]) for k in sorted(kwargs)])
 
 
-def grouping_to_array(g, stat=None, pick=None):
+def grouping_to_array(g, default=None, dtype=None, stat=None, pick=None):
+    """
+    Convert a grouping to a numpy array
+
+    g : grouping(dict)
+        grouping to convert
+
+    default : default=None
+        value for cells where no value was found
+        if default is None, it will be 'guessed' using the dtype
+            dtype = str : default = ''
+            dtype = int : default = 0
+            dtype = float : default = nan
+            else empty values will be random
+
+    dtype : numpy.dtype (default=None)
+        if None, will be 'guessed' using guess_type on leaf values
+
+    stat : func (default=None)
+        if not None, run grouping.ops.stat on function first
+        with optional pick
+
+    pick, see stat
+
+    Returns
+    ------
+        keys : list of lists of keys
+            grouping keys at each levels
+
+        array : numpy.ndarray
+            grouping values
+    """
     if stat is not None:
         g = grouping.ops.stat(g, stat, pick)
     keys = []
     for di in xrange(grouping.ops.depth(g)):
         keys.append(sorted(grouping.ops.all_keys(g, di)))
-    #print keys
-    dtype = guess_type(grouping.ops.leaves(g))
-    #print dtype
-    m = numpy.zeros([len(k) for k in keys], dtype=dtype)
-    #print m.shape
+    if dtype is None:
+        dtype = guess_type(grouping.ops.leaves(g))
+    m = numpy.empty([len(k) for k in keys], dtype=dtype)
+    if default is not None:
+        m[:] = default
+    else:
+        if numpy.issubdtype(dtype, int):
+            m[:] = 0
+        elif numpy.issubdtype(dtype, float):
+            m[:] = numpy.nan
+        elif numpy.issubdtype(dtype, str):
+            m[:] = ''
     for (ks, v) in grouping.ops.walk(g):
         inds = tuple([dk.index(k) for (k, dk) in zip(ks, keys)])
-        #print ks, inds, v
         m[inds] = v
-    return m
+    return keys, m
