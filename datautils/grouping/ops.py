@@ -4,6 +4,10 @@ from .. import ddict
 from ..listify import listify
 
 
+class GroupingOpsError(Exception):
+    pass
+
+
 def depth(d, l=0):
     """Measure grouping depth [how nested is this dict?]"""
     if isinstance(d, dict):
@@ -13,6 +17,46 @@ def depth(d, l=0):
         return max([depth(v, l) for v in d.values()])
     else:
         return l
+
+
+def breadth(d, level=0, f=max):
+    """
+    Measure the grouping breadth at some level
+
+    level: int
+        level at which to measure depth (0 = first level)
+        if level >= depth, will return 0
+
+    f : function (default=max)
+        function to compare level breadths. If max, will return maximum breadth
+    """
+    if level == 0:
+        if not isinstance(d, dict):
+            raise GroupingOpsError(
+                "breadth can only be measured for dicts not %s" % type(d))
+        return len(d.keys())
+    else:
+        if depth(d) <= level:
+            return 0
+            #raise GroupingOpsError("Invalid breadth level: %i >= %i"
+            #                             % (level, depth(d)))
+        return f([breadth(d[k], level - 1) for k in d.keys()
+                  if isinstance(d[k], dict)])
+
+
+def all_keys(d, level=0):
+    if level == 0:
+        if not isinstance(d, dict):
+            raise GroupingOpsError(
+                "breadth can only be measured for dicts not %s" % type(d))
+        return d.keys()
+    else:
+        if depth(d) <= level:
+            return []
+        return list(set(reduce(
+            lambda a, b: a + b,
+            [all_keys(d[k], level - 1) for k in d.keys()
+             if isinstance(d[k], dict)])))
 
 
 def combine(d0, d1, r=None):
@@ -88,6 +132,13 @@ def drop_levels(groups, lvls):
     for k, v in groups.iteritems():
         r[k] = drop_levels(v, dl)
     return r
+
+
+def leaves(groups):
+    """
+    Drop all groups, returning all the leaf values
+    """
+    return drop_levels(groups, range(depth(groups)))
 
 
 def collapse(groups, spaces):
@@ -222,6 +273,39 @@ def stat(gts, func, pick_key=None):
         elif isinstance(d[k], (list, tuple)):
             r[k] = func(d[k])
     return r
+
+
+def walk(g, keys=None):
+    """
+    Walk by iterating through all leaves of a grouping
+
+    g : grouping(dict)
+        grouping to walk
+
+    Returns
+    -----
+        iterator that yields:
+            keys, value(s)
+
+        keys is a list of keys
+        value(s) at g['.'.join(keys)]
+
+    keys : internal, do not use
+    """
+    if not isinstance(g, dict):
+        raise GroupingOpsError("Cannot walk non-dict: %s" % type(g))
+    if keys is None:
+        keys = ['']
+    else:
+        keys.append('')
+    for k in sorted(g.keys()):
+        keys[-1] = k
+        if isinstance(g[k], dict):
+            for si in walk(g[k], keys):
+                yield si
+        else:
+            yield keys[:], g[k]
+    keys.pop(-1)
 
 
 def test_stat():
