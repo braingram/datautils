@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from .. import ddict
 from ..listify import listify
 
 
@@ -37,7 +38,8 @@ def combine(d0, d1, r=None):
     if r is None:
         r = {}
     for k in set(d0.keys() + d1.keys()):
-        r[k] = combine(d0.get(k, None), d1.get(k, None))
+        r[k] = combine(ddict.ops.tdget(d0, k, None),
+                       ddict.ops.tdget(d1, k, None))
     return r
 
 
@@ -170,7 +172,8 @@ def prune(gts, *keys):
 
 def pick(gts, key, default=None):
     """
-    Reduce leaf nodes from dicts to single values (leaf.get(key, default))
+    Reduce leaf nodes from dicts to single values with
+        ddict.tdget(leaf, key, default)
 
     key : string
         leaf key used to unlock return values
@@ -191,10 +194,10 @@ def pick(gts, key, default=None):
             if isinstance(gts[k], dict):
                 r[k] = pick(gts[k], key)
             elif isinstance(gts[k], (list, tuple)):
-                r[k] = [i.get(key, default) for i in gts[k]]
+                r[k] = [ddict.ops.tdget(i, key, default) for i in gts[k]]
         return r
     elif isinstance(gts, (list, tuple)):
-        return [i.get(key, default) for i in gts]
+        return [ddict.ops.tdget(i, key, default) for i in gts]
 
 
 def stat(gts, func, pick_key=None):

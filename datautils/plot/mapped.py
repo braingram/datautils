@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
+import numpy
 import pylab
 import mpl_toolkits.mplot3d as mplot3d
 
-from .. import remap
+from .. import grouping
 from .. import listify
+from .. import np
+from .. import remap
 
 
 def pfunc(required=None, optional=None, auto=True, shadowkwargs=None):
@@ -60,7 +63,8 @@ def pfunc(required=None, optional=None, auto=True, shadowkwargs=None):
     """
     required = [] if required is None else required
     optional = [] if optional is None else optional
-    shadowkwargs = [] if shadowkwargs is None else shadowkwargs
+    shadowkwargs = ['decorate', 'xt', 'xtl', 'yt', 'ytl', 'zt', 'ztl'] if \
+        shadowkwargs is None else shadowkwargs
     required = listify(required)
     optional = listify(optional)
     shadowkwargs = listify(shadowkwargs)
@@ -91,7 +95,8 @@ def pfunc(required=None, optional=None, auto=True, shadowkwargs=None):
                     args.append(mapping.pop(o))
             kwargs.update(mapping)
 
-            skwargs = dict([(k, kwargs.pop(k)) for k in shadowkwargs])
+            skwargs = dict([(k, kwargs.pop(k)) for k in shadowkwargs
+                            if k in kwargs])
 
             if auto:
                 f = getattr(pylab, function.__name__)
@@ -114,83 +119,171 @@ def pfunc(required=None, optional=None, auto=True, shadowkwargs=None):
     return wrapper
 
 
+def read_key(k):
+    if isinstance(k, dict):
+        return k['k']
+    return k
+
+
+def decorate(ax, d, m, **kwargs):
+    if 'x' in kwargs:
+        ax.set_xlabel(read_key(m[kwargs['x']]))
+    if 'y' in kwargs:
+        ax.set_ylabel(read_key(m[kwargs['y']]))
+    if 'z' in kwargs:
+        ax.set_zlabel(read_key(m[kwargs['z']]))
+    if any([k in ('xt', 'xtl', 'yt', 'ytl', 'zt', 'ztl') for k in m]):
+        rm = remap(d, m, asdocs=False)
+    else:
+        return
+    if 'xt' in m:
+        ax.set_xticks(rm['xt'])
+    if 'xtl' in m:
+        ax.set_xticklabels(rm['xtl'])
+    if 'yt' in m:
+        ax.set_yticks(rm['yt'])
+    if 'ytl' in m:
+        ax.set_yticklabels(rm['ytl'])
+    if 'zt' in m:
+        ax.set_zticks(rm['zt'])
+    if 'ztl' in m:
+        ax.set_zticklabels(rm['ztl'])
+
+
 @pfunc(required=('left', 'height'))
 def bar(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, x='left', y='height')
     return
 
 
 @pfunc(required=('bottom', 'width'))
 def barh(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, x='width', y='bottom')
     return
+
+
+@pfunc(required=('x'), optional='y', auto=False)
+def bin(d, m, *args, **kwargs):
+    ax = pylab.gca()
+    g = grouping.group(args[0], gtype='d')  # thing to group
+    lefts = [i for i in range(len(g))]
+    labels = sorted(g.keys())
+    if len(args) == 1:
+        values = [len(g[k]) for k in labels]
+    elif len(args) > 1:  # a y was provided
+        stat = np.flookup.lookup(kwargs.get('stat', 'mean'))
+        d = np.convert.labeled_array(x=args[0], y=args[1])
+        values = []
+        for l in labels:
+            values.append(stat(d[d['x'] == l]['y']))
+    r = ax.bar(lefts, values)
+    if kwargs.get('decorate', False):
+        decorate(ax, d, m, x='x', y='y')
+    # make xticks & xticklabels if they're not defined
+    if 'xt' not in m:
+        ax.set_xticks([i + 0.5 for i in lefts])
+    if 'xtl' not in m:
+        ax.set_xticklabels(labels)
+    return r
 
 
 @pfunc(required=('x', 'y'))
 def errorbar(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, x='x', y='y')
     return
 
 
 @pfunc(required='x')
 def hist(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, x='x')
     return
 
 
 @pfunc(required='x', optional=('y', 'fmt'))
 def plot(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, x='x', y='y')
     return
 
 
 @pfunc(required=('x', 'y'))
 def scatter(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, x='x', y='y')
     return
 
 
 @pfunc(required='x')
 def boxplot(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, x='x')
     return
 
 
 @pfunc(required='y')
 def axhline(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, y='y')
     return
 
 
 @pfunc(required='x')
 def axvline(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, x='x')
     return
 
 
 @pfunc(required=('ymin', 'ymax'))
 def axhspan(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, y='ymin')
     return
 
 
 @pfunc(required=('xmin', 'xmax'))
 def axvspan(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, x='xmin')
     return
 
 
 @pfunc(required=('x', 'y'), optional='c')
 def fill(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, x='x', y='y')
     return
 
 
 @pfunc(required=('x', 'y1'))
 def fill_between(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, x='x', y='y1')
     return
 
 
 @pfunc(required=('y', 'x1'))
 def fill_betweenx(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, x='x1', y='y')
     return
 
 
 @pfunc(required=('y', 'xmin', 'xmax'))
 def hlines(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, x='xmin', y='y')
     return
 
 
 @pfunc(required=('x', 'ymin', 'ymax'))
 def vlines(d, m, *args, **kwargs):
+    if kwargs.get('decorate', False):
+        decorate(pylab.gca(), d, m, x='x', y='ymin')
     return
 
 
@@ -210,59 +303,86 @@ def get_3d_axes():
 @pfunc(required=('x', 'y'), optional='z', auto=False)
 def plot3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
-    return ax.plot(*args, **kwargs)
+    r = ax.plot(*args, **kwargs)
+    if kwargs.pop('decorate', False):
+        decorate(ax, d, m, x='x', y='y', z='z')
+    return r
 
 
 @pfunc(required=('x', 'y'), optional='z', auto=False)
 def scatter3d(d, m, *args, **kwargs):
-    print args, kwargs
     ax = get_3d_axes()
-    return ax.scatter(*args, **kwargs)
+    r = ax.scatter(*args, **kwargs)
+    if kwargs.pop('decorate', False):
+        decorate(ax, d, m, x='x', y='y', z='z')
+    return r
 
 
 @pfunc(required=('x', 'y', 'z'), auto=False)
 def wireframe3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
-    return ax.plot_wireframe(*args, **kwargs)
+    r = ax.plot_wireframe(*args, **kwargs)
+    if kwargs.pop('decorate', False):
+        decorate(ax, d, m, x='x', y='y', z='z')
+    return r
 
 
 @pfunc(required=('x', 'y', 'z'), auto=False)
 def surface3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
-    return ax.plot_surface(*args, **kwargs)
+    r = ax.plot_surface(*args, **kwargs)
+    if kwargs.pop('decorate', False):
+        decorate(ax, d, m, x='x', y='y', z='z')
+    return r
 
 
 @pfunc(required=('x', 'y', 'z'), auto=False)
 def trisurf3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
-    return ax.plot_trisurf(*args, **kwargs)
+    r = ax.plot_trisurf(*args, **kwargs)
+    if kwargs.pop('decorate', False):
+        decorate(ax, d, m, x='x', y='y', z='z')
+    return r
 
 
 @pfunc(required=('x', 'y', 'z'), auto=False)
 def contour3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
-    return ax.contour(*args, **kwargs)
+    r = ax.contour(*args, **kwargs)
+    if kwargs.pop('decorate', False):
+        decorate(ax, d, m, x='x', y='y', z='z')
+    return r
 
 
 @pfunc(required=('x', 'y', 'z'), auto=False)
 def contourf3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
-    return ax.contourf(*args, **kwargs)
+    r = ax.contourf(*args, **kwargs)
+    if kwargs.pop('decorate', False):
+        decorate(ax, d, m, x='x', y='y', z='z')
+    return r
 
 
 @pfunc(required='col', auto=False)
 def collection3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
-    return ax.add_collection3d(*args, **kwargs)
+    r = ax.add_collection3d(*args, **kwargs)
+    return r
 
 
 @pfunc(required=('left', 'height'), optional='zs', auto=False)
 def bar3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
-    return ax.bar3d(*args, **kwargs)
+    r = ax.bar3d(*args, **kwargs)
+    if kwargs.pop('decorate', False):
+        decorate(ax, d, m, x='left', y='height', z='zs')
+    return r
 
 
 @pfunc(required=('x', 'y', 'z', 's'), auto=False)
 def text3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
-    return ax.text3d(*args, **kwargs)
+    r = ax.text3d(*args, **kwargs)
+    if kwargs.pop('decorate', False):
+        decorate(ax, d, m, x='x', y='y', z='z')
+    return r
