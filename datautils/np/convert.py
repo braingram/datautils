@@ -2,6 +2,8 @@
 
 import numpy
 
+from .. import grouping
+
 
 class GuessError(Exception):
     pass
@@ -57,3 +59,21 @@ def labeled_array(**kwargs):
     on to ordered_labeled_array
     """
     return ordered_labeled_array(*[(k, kwargs[k]) for k in sorted(kwargs)])
+
+
+def grouping_to_array(g, stat=None, pick=None):
+    if stat is not None:
+        g = grouping.ops.stat(g, stat, pick)
+    keys = []
+    for di in xrange(grouping.ops.depth(g)):
+        keys.append(sorted(grouping.ops.all_keys(g, di)))
+    #print keys
+    dtype = guess_type(grouping.ops.leaves(g))
+    #print dtype
+    m = numpy.zeros([len(k) for k in keys], dtype=dtype)
+    #print m.shape
+    for (ks, v) in grouping.ops.walk(g):
+        inds = tuple([dk.index(k) for (k, dk) in zip(ks, keys)])
+        #print ks, inds, v
+        m[inds] = v
+    return m
