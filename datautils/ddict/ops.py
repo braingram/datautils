@@ -46,16 +46,24 @@ def dget(d, k, delimiter='.'):
     """
     dotted get
     """
-    return rget(d, *k.split(delimiter))
+    if isinstance(k, (str, unicode)):
+        return rget(d, *k.split(delimiter))
+    return rget(d, k)
 
 
 def dset(d, k, v, delimiter='.'):
-    ks = k.split(delimiter)
-    rset(d, ks[0], v, *ks[1:])
+    if isinstance(k, (str, unicode)):
+        ks = k.split(delimiter)
+        rset(d, ks[0], v, *ks[1:])
+    else:
+        rset(d, k, v)
 
 
-def ddel(d, k, v, delimiter='.'):
-    rdel(d, *k.split(delimiter))
+def ddel(d, k, delimiter='.'):
+    if isinstance(k, (str, unicode)):
+        rdel(d, *k.split(delimiter))
+    else:
+        rdel(d, k)
 
 
 def tget(d, k, default=None, delimiter=None):
@@ -70,9 +78,7 @@ def tget(d, k, default=None, delimiter=None):
 
 
 def tdget(d, k, default=None):
-    if isinstance(k, (str, unicode)):
-        return tget(d, k, default, '.')
-    return tget(d, k, default)
+    return tget(d, k, default, '.')
 
 
 # ------------------ tests ------------------
