@@ -17,7 +17,6 @@ scripts = None
 requirements_file = None
 requirements = None
 version = None
-#version = '1.0.1'
 dependency_links = None
 use_numpy = False
 
