@@ -70,7 +70,9 @@ def tget(d, k, default=None, delimiter=None):
 
 
 def tdget(d, k, default=None):
-    return tget(d, k, default, '.')
+    if isinstance(k, (str, unicode)):
+        return tget(d, k, default, '.')
+    return tget(d, k, default)
 
 
 # ------------------ tests ------------------
