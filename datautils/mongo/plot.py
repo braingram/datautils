@@ -17,6 +17,7 @@ import pymongo
 
 import qarg
 
+from .. import grouping
 from .. import np
 from ..plot import mapped
 
@@ -69,6 +70,10 @@ def plot(args=None, **kwargs):
 
     query : dict
         query to issue to collection
+
+    group : string
+        group documents by some attribute, then plot each group
+        if None (default), do not group
     """
     _, opts = qarg.simple.parse(args)
 
@@ -101,6 +106,10 @@ def plot(args=None, **kwargs):
     query = kwargs.pop('query', {})
     query.update(opts.pop('query', {}))
 
+    groupkey = kwargs.pop('group', None)
+    if not isinstance(groupkey, (str, unicode)):
+        raise ValueError("Grouping can only be done by string: %s" % groupkey)
+
     opts = parse_opts(opts)
     mask = {}
     for k in opts:
@@ -108,12 +117,23 @@ def plot(args=None, **kwargs):
             mask[opts[k]['k']] = True
         else:
             mask[opts[k]] = True
+    if groupkey is not None:
+        mask[groupkey] = True
 
     data = [d for d in collection.find(query, mask)]
 
     f = getattr(mapped, ptype)
 
-    f(data, opts, decorate=True, **kwargs)
+    if groupkey is not None:
+        g = grouping.group(data, groupkey)
+        ks = sorted(g.keys())
+        cm = pylab.cm.get_cmap()
+        colors = [cm(float(i) / (len(ks) - 1)) for i in xrange(len(ks))]
+        for (c, k) in zip(colors, ks):
+            f(g[k], opts, decorate=True, label=k, color=c, **kwargs)
+        pylab.legend()
+    else:
+        f(data, opts, decorate=True, **kwargs)
 
     if save:
         pylab.savefig(save)
