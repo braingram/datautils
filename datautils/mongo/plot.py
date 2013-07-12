@@ -107,7 +107,7 @@ def plot(args=None, **kwargs):
     query.update(opts.pop('query', {}))
 
     groupkey = kwargs.pop('group', None)
-    if not isinstance(groupkey, (str, unicode)):
+    if (groupkey is not None) and (isinstance(groupkey, (str, unicode))):
         raise ValueError("Grouping can only be done by string: %s" % groupkey)
 
     opts = parse_opts(opts)
