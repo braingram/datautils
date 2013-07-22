@@ -31,6 +31,7 @@ fs = {
     'finitemean': finitemean,
     'finitestd': finitestd,
     'stderr': stderr,
+    'len': len,
 }
 
 
