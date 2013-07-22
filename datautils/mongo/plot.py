@@ -24,10 +24,12 @@ from ..plot import mapped
 
 def parse_opts(opts):
     """
-    code(foo) : code foo (useful for plotting lists of strings
+    "code:foo" : code foo (useful for plotting lists of strings
 
     -- planned --
-    numpy.bar(foo) : call a numpy function on foo
+    bar:foo : call a numpy function on foo
+
+    see np.flookup
     """
     for k in opts:
         if ':' in opts[k]:
