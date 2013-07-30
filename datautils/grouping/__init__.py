@@ -4,6 +4,8 @@ from coding import to_codes
 from utils import group, group2, groupn
 import ops
 from ops import depth, drop_levels, collapse
+from . import display
 
-__all__ = ['to_codes', 'group', 'group2', 'groupn', 'depth', 'drop_levels',
+
+__all__ = ['display', 'to_codes', 'group', 'group2', 'groupn', 'depth', 'drop_levels',
            'ops', 'collapse']
