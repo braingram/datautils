@@ -4,7 +4,8 @@
 from . import ops
 
 
-def as_table(g, ks0=None, ks1=None, as_cols=True, nfmt=None, default=None):
+def as_table(g, ks0=None, ks1=None, as_cols=True, nfmt=None, default=None,
+             percent=False):
     if default is None:
         default = ''
     if ops.depth(g) != 2:
@@ -43,6 +44,8 @@ def as_table(g, ks0=None, ks1=None, as_cols=True, nfmt=None, default=None):
     # print header
     for c in cs:
         print "\t%s" % c,
+        if percent:
+            print "\t%s%%" % c,
     print
     # print values
     for r in rs:
@@ -53,4 +56,11 @@ def as_table(g, ks0=None, ks1=None, as_cols=True, nfmt=None, default=None):
             except KeyError:
                 s = default
             print "\t%s" % s,
+            if percent:
+                try:
+                    p = sf(c, r) / float(sf(cs[0], r)) * 100.
+                    s = '%.0f%%' % p
+                except KeyError:
+                    s = default
+                print "\t%s" % s,
         print
