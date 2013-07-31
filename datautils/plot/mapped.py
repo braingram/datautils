@@ -303,8 +303,9 @@ def get_3d_axes():
 @pfunc(required=('x', 'y'), optional='z', auto=False)
 def plot3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    d = kwargs.pop('decorate', False)
     r = ax.plot(*args, **kwargs)
-    if kwargs.pop('decorate', False):
+    if d:
         decorate(ax, d, m, x='x', y='y', z='z')
     return r
 
@@ -312,8 +313,9 @@ def plot3d(d, m, *args, **kwargs):
 @pfunc(required=('x', 'y'), optional='z', auto=False)
 def scatter3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    d = kwargs.pop('decorate', False)
     r = ax.scatter(*args, **kwargs)
-    if kwargs.pop('decorate', False):
+    if d:
         decorate(ax, d, m, x='x', y='y', z='z')
     return r
 
@@ -321,8 +323,9 @@ def scatter3d(d, m, *args, **kwargs):
 @pfunc(required=('x', 'y', 'z'), auto=False)
 def wireframe3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    d = kwargs.pop('decorate', False)
     r = ax.plot_wireframe(*args, **kwargs)
-    if kwargs.pop('decorate', False):
+    if d:
         decorate(ax, d, m, x='x', y='y', z='z')
     return r
 
@@ -330,8 +333,9 @@ def wireframe3d(d, m, *args, **kwargs):
 @pfunc(required=('x', 'y', 'z'), auto=False)
 def surface3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    d = kwargs.pop('decorate', False)
     r = ax.plot_surface(*args, **kwargs)
-    if kwargs.pop('decorate', False):
+    if d:
         decorate(ax, d, m, x='x', y='y', z='z')
     return r
 
@@ -339,8 +343,9 @@ def surface3d(d, m, *args, **kwargs):
 @pfunc(required=('x', 'y', 'z'), auto=False)
 def trisurf3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    d = kwargs.pop('decorate', False)
     r = ax.plot_trisurf(*args, **kwargs)
-    if kwargs.pop('decorate', False):
+    if d:
         decorate(ax, d, m, x='x', y='y', z='z')
     return r
 
@@ -348,8 +353,9 @@ def trisurf3d(d, m, *args, **kwargs):
 @pfunc(required=('x', 'y', 'z'), auto=False)
 def contour3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    d = kwargs.pop('decorate', False)
     r = ax.contour(*args, **kwargs)
-    if kwargs.pop('decorate', False):
+    if d:
         decorate(ax, d, m, x='x', y='y', z='z')
     return r
 
@@ -357,8 +363,9 @@ def contour3d(d, m, *args, **kwargs):
 @pfunc(required=('x', 'y', 'z'), auto=False)
 def contourf3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    d = kwargs.pop('decorate', False)
     r = ax.contourf(*args, **kwargs)
-    if kwargs.pop('decorate', False):
+    if d:
         decorate(ax, d, m, x='x', y='y', z='z')
     return r
 
@@ -366,6 +373,7 @@ def contourf3d(d, m, *args, **kwargs):
 @pfunc(required='col', auto=False)
 def collection3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    kwargs.pop('decorate', False)
     r = ax.add_collection3d(*args, **kwargs)
     return r
 
@@ -373,8 +381,9 @@ def collection3d(d, m, *args, **kwargs):
 @pfunc(required=('left', 'height'), optional='zs', auto=False)
 def bar3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    d = kwargs.pop('decorate', False)
     r = ax.bar3d(*args, **kwargs)
-    if kwargs.pop('decorate', False):
+    if d:
         decorate(ax, d, m, x='left', y='height', z='zs')
     return r
 
@@ -382,7 +391,8 @@ def bar3d(d, m, *args, **kwargs):
 @pfunc(required=('x', 'y', 'z', 's'), auto=False)
 def text3d(d, m, *args, **kwargs):
     ax = get_3d_axes()
+    d = kwargs.pop('decorate', False)
     r = ax.text3d(*args, **kwargs)
-    if kwargs.pop('decorate', False):
+    if d:
         decorate(ax, d, m, x='x', y='y', z='z')
     return r
