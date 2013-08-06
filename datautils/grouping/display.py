@@ -3,9 +3,14 @@
 
 from . import ops
 
+try:
+    from scipy.stats import chisquare as chisquare_test
+except ImportError:
+    chisquare_test = None
+
 
 def as_table(g, ks0=None, ks1=None, as_cols=True, nfmt=None, default=None,
-             percent=False):
+             percent=False, chisquare=False):
     if default is None:
         default = ''
     if ops.depth(g) != 2:
@@ -40,6 +45,15 @@ def as_table(g, ks0=None, ks1=None, as_cols=True, nfmt=None, default=None,
     #if not all(map(lambda l: isinstance(l, (int, float)), lvs)):
     #    raise ValueError(
     #        "as_table only works for grouping with int or float leaves")
+    if chisquare:
+        if chisquare_test is None:
+            raise ImportError("Cannot import scipy.stats to run chisquare")
+        chis = {}  # keys = cols
+        chips = {}  # keys = cols
+        ns = [float(sf(cs[0], r)) for r in rs]
+        for c in cs:
+            vs = [sf(c, r) / n for (r, n) in zip(rs, ns)]
+            chis[c], chips[c] = chisquare_test(vs)
 
     # print header
     for c in cs:
@@ -55,7 +69,10 @@ def as_table(g, ks0=None, ks1=None, as_cols=True, nfmt=None, default=None,
                 s = nfmt % sf(c, r)
             except KeyError:
                 s = default
-            print "\t%s" % s,
+            if chisquare and (chips[c] < 0.05):
+                print "\t%s*" % s,
+            else:
+                print "\t%s" % s,
             if percent:
                 try:
                     p = sf(c, r) / float(sf(cs[0], r)) * 100.
@@ -63,4 +80,19 @@ def as_table(g, ks0=None, ks1=None, as_cols=True, nfmt=None, default=None,
                 except KeyError:
                     s = default
                 print "\t%s" % s,
+        print
+
+    if chisquare:
+        print "-------- chisquare results -------"
+        print "chi",
+        for c in cs:
+            print "\t%.2f" % (chis[c], ),
+            if percent:
+                print "\t",
+        print
+        print "chi p",
+        for c in cs:
+            print "\t%.3f" % (chips[c], ),
+            if percent:
+                print "\t",
         print
