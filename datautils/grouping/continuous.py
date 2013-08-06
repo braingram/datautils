@@ -57,8 +57,8 @@ def level_test(start, end, inclusive):
     elif inclusive == 'neither':
         return neither_level_test(start, end)
     else:
-        raise ValueError("Invalid inclusive[%s] must be 'right'/'left'" % \
-                inclusive)
+        raise ValueError("Invalid inclusive[%s] must be 'right'/'left'" %
+                         inclusive)
 
 
 def name_function(ftype):
@@ -72,21 +72,29 @@ def name_function(ftype):
         return lambda s, e: "(%g, %g)" % (s, e)
 
 
-def find_levels(values, key=None, n=None, \
-        inclusive='histogram', names='start'):
+def find_levels(values, key=None, n=None, inclusive='histogram',
+                names='start', overlap=0.0):
     vs = values if key is None else map(key, values)
     n = len(vs) ** 0.5 if n is None else n
     vmin, vmax = minmax(vs)
+    dv = (vmax - vmin) / n
+    overlap = dv * overlap / 2.
     bounds = linspace(vmin, vmax, n + 1)
     to_name = name_function(names)
     if inclusive == 'histogram':
         lvls = {}
         # all but last are half-open
         for (s, e) in zip(bounds[:-2], bounds[1:-1]):
+            s -= overlap
+            e += overlap
             lvls[to_name(s, e)] = left_level_test(s, e)
         s, e = bounds[-2:]
+        s -= overlap
+        e += overlap
         lvls[to_name(s, e)] = both_level_test(s, e)
         return lvls
     else:
-        return dict([(to_name(s, e), level_test(s, e, inclusive)) \
-                for (s, e) in bounds])
+        return dict(
+            [(to_name(s - overlap, e + overlap),
+              level_test(s - overlap, e + overlap, inclusive))
+             for (s, e) in bounds])
