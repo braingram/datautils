@@ -112,6 +112,8 @@ def plot(args=None, **kwargs):
     if (groupkey is not None) and (not isinstance(groupkey, (str, unicode))):
         raise ValueError("Grouping can only be done by string: %s" % groupkey)
 
+    post = kwargs.pop('post', False)
+
     opts = parse_opts(opts)
     mask = {}
     for k in opts:
@@ -136,6 +138,9 @@ def plot(args=None, **kwargs):
         pylab.legend()
     else:
         f(data, opts, decorate=True, **kwargs)
+
+    if hasattr(post, '__call__'):
+        post()
 
     if save:
         pylab.savefig(save)
