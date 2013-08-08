@@ -39,6 +39,32 @@ def parse_opts(opts):
     return opts
 
 
+def parse_post_arg(a):
+    try:
+        return float(a)
+    except:
+        return a
+
+
+def parse_post(post):
+    if isinstance(post, (tuple, list)):
+        fs = [parse_post(i) for i in post]
+        return lambda: [f() for f in fs if hasattr(f, '__call__')]
+    if ':' not in post:
+        if hasattr(pylab, post):
+            return getattr(pylab, post)
+        return None
+    ts = post.split(':')
+    if len(ts) > 2:
+        return None
+    f, args = ts
+    if not hasattr(pylab, f):
+        return None
+    f = getattr(pylab, f)
+    args = [parse_post_arg(i) for i in args.split(',')]
+    return lambda: f(*args)
+
+
 def plot(args=None, **kwargs):
     """
     Plot documents from a mongo database
