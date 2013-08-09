@@ -46,6 +46,11 @@ def parse_post_arg(a):
         return a
 
 
+def parse_post_kwarg(a):
+    k, v = a.split('=')
+    return k, parse_post_arg(v)
+
+
 def parse_post(post):
     if isinstance(post, (tuple, list)):
         fs = [parse_post(i) for i in post]
@@ -61,8 +66,9 @@ def parse_post(post):
     if not hasattr(pylab, f):
         return None
     f = getattr(pylab, f)
-    args = [parse_post_arg(i) for i in args.split(',')]
-    return lambda: f(*args)
+    vargs = [parse_post_arg(i) for i in args.split(',') if '=' not in i]
+    kwargs = dict([parse_post_kwarg(i) for i in args.split(',') if '=' in i])
+    return lambda: f(*vargs, **kwargs)
 
 
 def plot(args=None, **kwargs):
