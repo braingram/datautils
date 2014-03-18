@@ -16,6 +16,7 @@ Accepts a configuration dict that defines:
 """
 
 import copy
+import sys
 
 try:
     import contracts
@@ -40,26 +41,39 @@ class CheckError(Exception):
 
 
 def check_result(r, op):
-    if not (('target' in op) or ('bounds' in op)):
+    if not ('bounds' in op):
         return True
-    if 'target' in op:
-        return (r == op['target'])
-    target = op['bounds']
-    if isinstance(target, function):
-        return target(r)
-    if isinstance(target, (tuple, list)):  # min, max
-        return ((r >= target[0]) and (r <= target[1]))
-    if isinstance(target, (str, unicode)):
+    bounds = op['bounds']
+    if isinstance(bounds, function):
+        return bounds(r)
+    if isinstance(bounds, (tuple, list)):  # min, max
+        return ((r >= bounds[0]) and (r <= bounds[1]))
+    if isinstance(bounds, (str, unicode)):
         if has_contracts:
             try:
-                contracts.check(target, r)
+                contracts.check(bounds, r)
                 return True
             except contracts.ContractNotRespected:
                 return False
         else:
             raise ImportError(
-                "import contracts failed, contract found[{}".format(target))
-    raise CheckError("Unknown bounds type {}, {}".format(type(target), target))
+                "import contracts failed, contract found[{}".format(bounds))
+    raise CheckError("Unknown bounds type {}, {}".format(type(bounds), bounds))
+
+
+def lookup_function(name, module=None):
+    if '.' not in name:
+        if module is None:
+            raise LookupError("Failed to find function {}".format(name))
+        return getattr(module, name)
+    mn, sn = name.rsplit('.', 1)
+    if module is None:
+        if mn not in sys.modules:
+            __import__(mn)
+        module = sys.modules[mn]
+    else:
+        module = getattr(module, mn)
+    return lookup_function(sn, module)
 
 
 def build_op(f, **other):
@@ -68,6 +82,8 @@ def build_op(f, **other):
     else:
         op = copy.deepcopy(f)
     op.update(other)
+    if not isinstance(op['func'], function):
+        op['func'] = lookup_function(op['func'])
     return op
 
 
@@ -111,7 +127,6 @@ def test_pipeline():
         'a': {
             'func': lambda *args, **kwargs: 'a',
             'priority': 1,
-            'target': 'a',
         }
     }
     p = Pipeline(c)
@@ -169,21 +184,10 @@ def test_pipeline():
     c = {
         'a': {
             'func': one,
-            'target': 1,
+            'bounds': (0, 2),
             },
     }
 
-    p = Pipeline(c)
-    p('')
-    assert p.valid
-
-    c['a']['target'] = 2
-    p = Pipeline(c)
-    p('')
-    assert p.valid is False
-
-    del c['a']['target']
-    c['a']['bounds'] = (0, 2)
     p = Pipeline(c)
     p('')
     assert p.valid is True
