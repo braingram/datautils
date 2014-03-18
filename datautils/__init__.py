@@ -4,6 +4,7 @@ import warnings
 
 from . import ddict
 from .import grouping
+from . import pipeline
 from . import qfilter
 
 # get some useful functions
@@ -11,8 +12,9 @@ from .listify import listify
 from .qfilter import qf
 from .rmap import remap
 
-__version__ = '1.0.1'
-__all__ = ['listify', 'qf', 'remap']
+__version__ = '1.0.2'
+__all__ = [
+    'ddict', 'grouping', 'listify', 'pipeline', 'qf', 'qfilter', 'remap']
 
 try:
     from .import mongo
