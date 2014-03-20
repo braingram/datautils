@@ -4,7 +4,7 @@ import warnings
 
 from . import ddict
 from .import grouping
-from . import pipeline
+from . import structure
 from . import qfilter
 
 # get some useful functions
@@ -14,7 +14,7 @@ from .rmap import remap
 
 __version__ = '1.0.2'
 __all__ = [
-    'ddict', 'grouping', 'listify', 'pipeline', 'qf', 'qfilter', 'remap']
+    'ddict', 'grouping', 'listify', 'structure', 'qf', 'qfilter', 'remap']
 
 try:
     from .import mongo
