@@ -14,6 +14,7 @@ Plot recording locations
 
 import pylab
 import pymongo
+import re
 
 import qarg
 
@@ -152,7 +153,14 @@ def plot(args=None, **kwargs):
         if isinstance(opts[k], dict):
             mask[opts[k]['k']] = True
         else:
-            mask[opts[k]] = True
+            ms = re.findall('{.*?}', opts[k])
+            if len(ms):
+                for m in ms:
+                    mask[m[1:-1]] = True
+                # have to also grab base as we don't know the needed sub items
+                mask[opts[k][:re.search('{.*?}', opts[k]).start() - 1]] = True
+            else:
+                mask[opts[k]] = True
     if groupkey is not None:
         mask[groupkey] = True
 

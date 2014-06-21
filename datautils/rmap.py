@@ -43,6 +43,8 @@ remap(docs, {'dest':
 # [{'mongo.key': 1}, {'mongo.key': 2}] -> {'dest': [4, ]}
 """
 
+import re
+
 from . import ddict
 from . import qfilter
 
@@ -120,7 +122,16 @@ def remap(cursor, mapping, asdocs=False):
     rs = [{} for _ in xrange(len(docs))]
     for i in xrange(len(docs)):
         for rk, mk in ss.iteritems():
-            rs[i][rk] = docs[i][mk]
+            ms = re.findall('{.*?}', mk)
+            if len(ms):
+                cmk = re.sub('{.*?}', '{}', mk)
+                items = []
+                for m in ms:
+                    k = m[1:-1]
+                    items.append(docs[i][k])
+                rs[i][rk] = docs[i][cmk.format(*items)]
+            else:
+                rs[i][rk] = docs[i][mk]
 
     # then functions
     frs = apply_functions(docs, fs)  # returns dict
