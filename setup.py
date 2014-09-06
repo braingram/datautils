@@ -247,4 +247,6 @@ if __name__ == '__main__':
             dependency_links=dependency_links,
             author="Brett Graham",
             author_email="braingram720@gmail.com",
+            description="Data manipulation tools for python",
+            url="https://github.com/braingram/datautils",
         )
