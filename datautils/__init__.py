@@ -12,7 +12,7 @@ from .listify import listify
 from .qfilter import qf
 from .rmap import remap
 
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 __all__ = [
     'ddict', 'grouping', 'listify', 'structures', 'qf', 'qfilter', 'remap']
 
