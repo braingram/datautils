@@ -26,11 +26,11 @@ try:
     from .np import mask_array
     __all__.append('mask_array')
 except ImportError as E:
-    warnings.warn('datautils.np failed to import with: %S' % E)
+    warnings.warn('datautils.np failed to import with: %s' % E)
 
 
 try:
     import plot
     __all__.append('plot')
 except ImportError as E:
-    warnings.warn('datautils.plot failed to import with: %S' % E)
+    warnings.warn('datautils.plot failed to import with: %s' % E)
