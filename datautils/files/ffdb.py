@@ -200,13 +200,15 @@ class FFDB(object):
                         else:
                             kwargs[k] = gd[k]
                     self.data[name].append(rcfg['type'](ffn, *args, **kwargs))
+                    ffn = None
                     break
-            # didn't match any
-            # if it's a directory, load it as a FFDB
-            if os.path.isdir(ffn):
-                self.data[fn] = FFDB(ffn)
-            else:  # else, list it as an orphan
-                self.orphans.append(ffn)
+            if ffn is not None:
+                # didn't match any
+                # if it's a directory, load it as a FFDB
+                if os.path.isdir(ffn):
+                    self.data[fn] = FFDB(ffn)
+                else:  # else, list it as an orphan
+                    self.orphans.append(ffn)
 
     def query(self, key, query=None):
         """Query the database (using a qfilter type filter)
