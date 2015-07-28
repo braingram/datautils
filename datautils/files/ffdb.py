@@ -230,4 +230,4 @@ class FFDB(object):
 
 
 return_types['FFDB'] = \
-    lambda fn, *args, **kwargs: dict(kwargs, db=FFDB(fn, *args))
+    lambda fn, *args, **kwargs: dict(kwargs, db=FFDB(fn, *args), fn=fn)
