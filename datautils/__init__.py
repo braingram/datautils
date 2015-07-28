@@ -3,7 +3,8 @@
 import warnings
 
 from . import ddict
-from .import grouping
+from . import files
+from . import grouping
 from . import structures
 from . import qfilter
 
@@ -12,9 +13,10 @@ from .listify import listify
 from .qfilter import qf
 from .rmap import remap
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 __all__ = [
-    'ddict', 'grouping', 'listify', 'structures', 'qf', 'qfilter', 'remap']
+    'ddict', 'files', 'grouping', 'listify', 'structures', 'qf', 'qfilter',
+    'remap']
 
 try:
     from .import mongo
