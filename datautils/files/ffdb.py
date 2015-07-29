@@ -71,7 +71,7 @@ class FFDBError(Exception):
 
 class FFDB(object):
     """Access data arranged as flat files in a directory"""
-    def __init__(self, directory, config=None):
+    def __init__(self, directory, config=None, update=True):
         if not os.path.isdir(directory):
             raise FFDBError("FFDB: %s not a directory" % directory)
         self.directory = os.path.realpath(os.path.expanduser(directory))
@@ -87,6 +87,18 @@ class FFDB(object):
             self.config = file_config
         else:
             self.config = config
+        if update:
+            self.update_index()
+
+    # make this pickleable
+    def __reduce__(self):
+        return (
+            FFDB,
+            (self.directory, self._raw_config, False),
+            (self.data, self.orphans))
+
+    def __setstate__(self, state):
+        self.data, self.orphans = state
 
     @property
     def config(self):
@@ -103,6 +115,7 @@ class FFDB(object):
         """
         # resolve all options
         # first clear the existing config
+        self._raw_config = cfg.copy()
         self._config = {}
         for k in cfg:
             if k in self._config:
@@ -171,10 +184,8 @@ class FFDB(object):
             if r in self._regexes:
                 raise FFDBError("duplicate regex: %r" % r)
             self._regexes[r] = k
-        # update index
-        self.update()
 
-    def update(self):
+    def update_index(self):
         self.data = {k: [] for k in self._config}
         self.orphans = []
         for fn in os.listdir(self.directory):
