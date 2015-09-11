@@ -14,14 +14,17 @@ class Lord(object):
         self.args = args
         self.kwargs = kwargs
 
-    def state(self, new_state=None):
+    def state(self, new_state=None, update=True):
         if new_state is None:
+            if update:
+                self.update()
             return self._state
         self._state = new_state
 
     def setup_process(self):
         self.process = multiprocessing.Process(
-            target=serf.run_serf, args=(self.serf, self.args, self.kwargs))
+            target=serf.run_serf, args=(
+                self.serf, self.serf_pipe, self.args, self.kwargs))
         self.process.daemon = True
 
     def send(self, attr, *args, **kwargs):
@@ -29,12 +32,10 @@ class Lord(object):
         self.pipe.send((attr, args, kwargs))
 
     def start(self):
-        if self.process is not None:
-            return
-        if self.process.is_alive():
+        if self.process is not None and self.process.is_alive():
             return
         self.setup_process()
-        self.process.run()
+        self.process.start()
 
     def stop(self, wait=True):
         if self.process is None:
@@ -47,6 +48,7 @@ class Lord(object):
             return
         while self.process.is_alive():
             self.update()
+        self.process.join()
         self.process = None
 
     def __del__(self):
@@ -55,5 +57,5 @@ class Lord(object):
     def update(self, timeout=0.001):
         while self.pipe.poll(timeout):
             msg = self.pipe.recv()
-            attr, args, kwargs = msg
+            attr, args, kwargs = serf.parse_message(self, msg)
             getattr(self, attr)(*args, **kwargs)
