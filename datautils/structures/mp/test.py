@@ -12,11 +12,11 @@ class SleepySerf(Serf):
 
 
 def test_sleepy_serf():
-    l = Lord(SleepySerf)
+    l = Lord()
     print "starting"
-    l.start()
+    l.start(SleepySerf)
     print "sleep"
-    l.send('sleep')
+    l.send('sleep', 1.)
     for i in xrange(10):
         print "state", l.state()
         time.sleep(0.1)

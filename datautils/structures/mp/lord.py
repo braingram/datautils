@@ -6,13 +6,9 @@ from . import serf
 
 
 class Lord(object):
-    def __init__(self, serf, args=None, kwargs=None):
-        self.pipe, self.serf_pipe = multiprocessing.Pipe()
+    def __init__(self):
         self._state = None
         self.process = None
-        self.serf = serf
-        self.args = args
-        self.kwargs = kwargs
 
     def state(self, new_state=None, update=False):
         if new_state is None:
@@ -24,20 +20,18 @@ class Lord(object):
     def error(self, *args, **kwargs):
         raise serf.SerfError(*args, **kwargs)
 
-    def setup_process(self):
-        self.process = multiprocessing.Process(
-            target=serf.run_serf, args=(
-                self.serf, self.serf_pipe, self.args, self.kwargs))
-        self.process.daemon = True
-
     def send(self, attr, *args, **kwargs):
         assert isinstance(attr, (str, unicode))
         self.pipe.send((attr, args, kwargs))
 
-    def start(self, wait=True):
+    def start(self, serf_class, args=None, kwargs=None, wait=True):
         if self.process is not None and self.process.is_alive():
             return
-        self.setup_process()
+        self.pipe, serf_pipe = multiprocessing.Pipe()
+        self.process = multiprocessing.Process(
+            target=serf.run_serf, args=(
+                serf_class, serf_pipe, args, kwargs))
+        self.process.daemon = True
         self.process.start()
         if wait:
             while self.state(update=True) is None:
@@ -58,7 +52,7 @@ class Lord(object):
         self.process = None
 
     def __del__(self):
-        self.send('exit')
+        self.stop(wait=True)
 
     def update(self, timeout=0.001):
         while self.pipe.poll(timeout):
