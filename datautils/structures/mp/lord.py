@@ -14,12 +14,15 @@ class Lord(object):
         self.args = args
         self.kwargs = kwargs
 
-    def state(self, new_state=None, update=True):
+    def state(self, new_state=None, update=False):
         if new_state is None:
             if update:
                 self.update()
             return self._state
         self._state = new_state
+
+    def error(self, *args, **kwargs):
+        raise serf.SerfError(*args, **kwargs)
 
     def setup_process(self):
         self.process = multiprocessing.Process(
@@ -31,11 +34,14 @@ class Lord(object):
         assert isinstance(attr, (str, unicode))
         self.pipe.send((attr, args, kwargs))
 
-    def start(self):
+    def start(self, wait=True):
         if self.process is not None and self.process.is_alive():
             return
         self.setup_process()
         self.process.start()
+        if wait:
+            while self.state(update=True) is None:
+                self.update()
 
     def stop(self, wait=True):
         if self.process is None:
