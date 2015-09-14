@@ -9,6 +9,22 @@ class Lord(object):
     def __init__(self):
         self._state = None
         self.process = None
+        self._cbindex = 0
+        self.callbacks = {}
+
+    def attach(self, attr, func):
+        if attr not in self.callbacks:
+            self.callbacks[attr] = {}
+        cbid = self._cbindex
+        self._cbindex += 1
+        self.callbacks[attr][cbid] = func
+
+    def detatch(self, cbid):
+        for a in self.callbacks:
+            if cbid in self.callbacks[a]:
+                del self.callbacks[a][cbid]
+                return
+        raise ValueError("Callback id[%s] not found" % (cbid, ))
 
     def state(self, new_state=None, update=False):
         if new_state is None:
@@ -55,7 +71,11 @@ class Lord(object):
         self.stop(wait=True)
 
     def update(self, timeout=0.001):
-        while self.pipe.poll(timeout):
+        if self.pipe.poll(timeout):
             msg = self.pipe.recv()
             attr, args, kwargs = serf.parse_message(self, msg)
             getattr(self, attr)(*args, **kwargs)
+            if attr in self.callbacks:
+                [
+                    self.callbacks[attr][cbid](*args, **kwargs)
+                    for cbid in self.callbacks[attr]]
