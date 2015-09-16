@@ -18,6 +18,7 @@ class Lord(object):
         cbid = self._cbindex
         self._cbindex += 1
         self.callbacks[attr][cbid] = func
+        return cbid
 
     def detatch(self, cbid):
         for a in self.callbacks:

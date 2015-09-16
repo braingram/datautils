@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import time
+
 
 class SerfError(Exception):
     pass
@@ -31,6 +33,15 @@ class Serf(object):
     def __init__(self, pipe):
         self.pipe = pipe
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, value):
+        self.send('state', value)
+        self._state = value
+
     def setup(self, *args, **kwargs):
         pass
 
@@ -43,15 +54,15 @@ class Serf(object):
         return True
 
     def exit(self):
-        self.send('state', 'exit')
+        self.state = 'exit'
 
     def run(self):
-        self.send('state', 'wait')
+        self.state = 'wait'
         while True:
             msg = self.pipe.recv()
             try:
                 attr, args, kwargs = parse_message(self, msg)
-                self.send('state', attr)
+                self.state = attr
                 result = getattr(self, attr)(*args, **kwargs)
                 if attr == 'exit':
                     break
@@ -62,7 +73,29 @@ class Serf(object):
                     break
                 else:
                     continue
-            self.send('state', 'wait')
+            self.state = 'wait'
+
+
+class TimedSerf(Serf):
+    def __init__(self, pipe):
+        Serf.__init__(self, pipe)
+        self._log = None
+
+    def set_log(self, fn):
+        if self._log is not None:
+            self._log.close()
+        self._log = open(fn, 'w')
+
+    @Serf.state.setter
+    def state(self, value):
+        if self._log is not None:
+            print value
+            self._log.write('%.6f,%s\n' % (time.time(), value))
+        Serf.state.fset(self, value)
+
+    def __del__(self):
+        if self._log is not None:
+            self._log.close()
 
 
 def run_serf(serf, pipe, args=None, kwargs=None):
