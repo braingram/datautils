@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
+import sys
 import time
+import traceback
 
 
 class SerfError(Exception):
@@ -69,6 +71,7 @@ class Serf(object):
                 if result is not None:
                     self.send(attr, result)
             except Exception as e:
+                traceback.print_exc(file=sys.stdout)
                 if self.error(str(e)):
                     break
                 else:
