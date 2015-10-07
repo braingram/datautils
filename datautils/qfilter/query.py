@@ -12,6 +12,20 @@ import math
 from ..ddict import dget
 
 
+def splits(data, key, n):
+    data = [d[key] for d in data]
+    minv = min(data)
+    maxv = max(data) + 1
+    delta = (maxv - minv) / float(n)
+    s = minv
+    qs = []
+    for i in xrange(n):
+        e = s + delta
+        qs.append({key: {'$gte': s, '$lt': e}})
+        s = e
+    return qs
+
+
 # ----------- Query Value parsing -----------
 def elemMatch_vtest(t):
     test = make_value_test(t)
@@ -151,10 +165,10 @@ def qfilter(data, query):
 # ------------------ tests ------------------
 def test_qfilter():
     items = [
-            {'a': {'b': {'c': 1}}},
-            {'a': {'b': {'c': 2}}},
-            {'all': [1, 2, 3]},
-            ]
+        {'a': {'b': {'c': 1}}},
+        {'a': {'b': {'c': 2}}},
+        {'all': [1, 2, 3]},
+        ]
     # test match
     assert len(qfilter(items, {'a.b.c': 1})) == 1
     assert len(qfilter(items, {'a.b.c': 2})) == 1

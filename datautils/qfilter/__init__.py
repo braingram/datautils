@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from query import qfilter
+from . import query
+from .query import qfilter
 qf = qfilter
 
-__all__ = ['qf', 'qfilter']
+__all__ = ['query', 'qf', 'qfilter']
