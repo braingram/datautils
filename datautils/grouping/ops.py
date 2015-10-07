@@ -68,7 +68,7 @@ def combine(d0, d1, r=None):
         - lists of grouped values are extended together
             ([1, 2] + [3, 4] = [1, 2, 3, 4])
 
-    This can be though of as taking two trees and adding
+    This can be thought of as taking two trees and adding
     together all the leaves.
     """
     if d0 is None:

@@ -10,6 +10,7 @@ import itertools
 import math
 
 from ..ddict import dget
+from ..listify import listify
 
 
 def splits(data, key, n):
@@ -23,6 +24,35 @@ def splits(data, key, n):
         e = s + delta
         qs.append({key: {'$gte': s, '$lt': e}})
         s = e
+    return qs
+
+
+def combine(q0, q1, *args):
+    """
+    Combine queries or lists of queries
+
+    if q0 or q1 is a list, the result will be len(q0) * len(q1) items long
+    where the items will be:
+        q0[0] + q1[0], q0[0] + q1[1]... q0[0] + q1[-1]... q0[-1] + q1[-1]
+    """
+    if len(args):
+        qs = combine(q0, q1)
+        return combine(qs, *args)
+    if q0 is None:
+        if q1 is None:
+            return []
+        return listify(q1)
+    if q1 is None:
+        return listify(q0)
+    q0 = listify(q0)
+    q1 = listify(q1)
+    qs = []
+    for i0 in q0:
+        for i1 in q1:
+            q = {}
+            q.update(i0)
+            q.update(i1)
+            qs.append(q)
     return qs
 
 
