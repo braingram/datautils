@@ -221,13 +221,14 @@ class FFDB(object):
                 else:  # else, list it as an orphan
                     self.orphans.append(ffn)
 
-    def query(self, key, query=None):
+    def query(self, key, query=None, **kwargs):
         """Query the database (using a qfilter type filter)
         """
         if key not in self._config:
             raise FFDBError("Unknown key %s" % key)
         if query is None:
-            return self.data[key]
+            query = {}
+        query.update(kwargs)
         return qfilter(self.data[key], query)
 
     def generate_filename(self, key, **kwargs):
