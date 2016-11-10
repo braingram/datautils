@@ -33,7 +33,7 @@ class PizcoNodeServer(pizco.Server):
 
 class IONode(object):
     def __init__(self, cfg=None):
-        cfg = config.parser.parse(cfg)
+        cfg = config.parse(cfg)
         if cfg is not None:
             if not isinstance(cfg, dict):
                 raise TypeError(
@@ -98,7 +98,7 @@ class IONode(object):
             logger.info(
                 "Configuring %s[%s] appending %s",
                 type(self), self, value)
-        value = config.parser.parse(value)
+        value = config.parse(value)
         if not isinstance(value, dict):
             raise TypeError(
                 "Config must be a dict not {}".format(type(value)))
@@ -107,9 +107,9 @@ class IONode(object):
         if replace:
             new_config = copy.deepcopy(value)
         else:
-            new_config = config.parser.cascade(self._config, value)
+            new_config = config.cascade(self._config, value)
         # make sure new_config is valid
-        delta = config.parser.delta(self._config, new_config)
+        delta = config.delta(self._config, new_config)
         try:
             self.check_config(new_config)
             self._config = new_config
@@ -146,7 +146,7 @@ class IONode(object):
     def save_config(self, fn):
         logger.info("%s[%s] saving config to %s: %s", type(self), self, fn,
                     self.config())
-        config.parser.save(self.config(), fn)
+        config.save(self.config(), fn)
 
     def load_config(self, fn):
         logger.info("%s[%s] loading config from %s", type(self), self, fn)
@@ -198,15 +198,15 @@ def resolve_config(node_type, module=None, cfg=None):
     user_config_filename = os.path.expanduser(
         '~/.temcagt/config/{}.json'.format(node_type))
     if os.path.exists(user_config_filename):
-        node_cfg = config.parser.cascade(
-            node_cfg, config.parser.parse(user_config_filename))
+        node_cfg = config.cascade(
+            node_cfg, config.parse(user_config_filename))
     else:
         logger.warning("{} user configuration ({}) missing".format(
             node_type, user_config_filename))
         pass
     # cascade local config (cfg) [this could be pre-parsed command line args]
     if cfg is not None:
-        node_cfg = config.parser.cascade(node_cfg, cfg)
+        node_cfg = config.cascade(node_cfg, cfg)
     return node_cfg
 
 
@@ -236,7 +236,7 @@ def command_line_launch(args=None):
         raise Exception("Must supply node type as first argument")
     node_type = args.pop(0)
     if len(args):
-        cfg = config.parser.parse_command_line(args)
+        cfg = config.parse_command_line(args)
     else:
         cfg = None
     launch(node_type, cfg)
