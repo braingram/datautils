@@ -188,6 +188,44 @@ class FFDB(object):
     def update_index(self):
         self.data = {k: [] for k in self._config}
         self.orphans = []
+        self._index_file(self.directory)
+
+    def _index_file(self, fn, directory=None):
+        print("indexing: %s, %s" % (fn, directory))
+        if directory is not None:
+            ffn = os.path.join(directory, fn)
+        else:
+            ffn = fn
+        print("\t%s" % ffn)
+        if os.path.isdir(ffn):
+            return [self._index_file(sfn, ffn) for sfn in os.listdir(ffn)]
+        for r in self._regexes:
+            m = re.match(r, fn)
+            if m is not None:
+                name = self._regexes[r]
+                # parse result
+                rcfg = self._config[name]['return']
+                args = rcfg['args']
+                kwargs = rcfg['kwargs'].copy()
+                gd = m.groupdict()
+                groups = self._config[name]['groups']
+                for k in gd:
+                    if k in groups:
+                        if isinstance(groups[k], dict):
+                            kwargs[k] = groups[k]['type'](
+                                gd[k], *groups[k].get('args', ()),
+                                **groups[k].get('kwargs', {}))
+                        else:
+                            kwargs[k] = groups[k](gd[k])
+                    else:
+                        kwargs[k] = gd[k]
+                self.data[name].append(rcfg['type'](ffn, *args, **kwargs))
+                ffn = None
+                break
+        if ffn is not None:
+            self.orphans.append(ffn)
+        return
+
         for fn in os.listdir(self.directory):
             ffn = os.path.join(self.directory, fn)
             for r in self._regexes:
