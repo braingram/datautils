@@ -191,12 +191,12 @@ class FFDB(object):
         self._index_file(self.directory)
 
     def _index_file(self, fn, directory=None):
-        print("indexing: %s, %s" % (fn, directory))
+        #print("indexing: %s, %s" % (fn, directory))
         if directory is not None:
             ffn = os.path.join(directory, fn)
         else:
             ffn = fn
-        print("\t%s" % ffn)
+        #print("\t%s" % ffn)
         if os.path.isdir(ffn):
             return [self._index_file(sfn, ffn) for sfn in os.listdir(ffn)]
         for r in self._regexes:
