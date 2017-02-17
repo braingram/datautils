@@ -87,7 +87,10 @@ class TimedSerf(Serf):
     def set_log(self, fn):
         if self._log is not None:
             self._log.close()
-        self._log = open(fn, 'w')
+        if fn is None:
+            self._log = None
+        else:
+            self._log = open(fn, 'w')
 
     @Serf.state.setter
     def state(self, value):
