@@ -15,20 +15,20 @@ class SleepySerf(TimedSerf):
 
 def test_sleepy_serf():
     l = Lord()
-    print "starting"
+    print("starting")
     l.start(SleepySerf)
-    print "sleep"
+    print("sleep")
     l.send('sleep', 1.)
-    for i in xrange(10):
-        print "state", l.state()
+    for i in range(10):
+        print("state", l.state())
         time.sleep(0.1)
     l.send('exit')
-    for i in xrange(10):
-        print "state", l.state()
+    for i in range(10):
+        print("state", l.state())
         time.sleep(0.1)
         if l.state() == 'exit':
             break
-    print "stopping"
+    print("stopping")
     l.stop()
 
 
@@ -40,5 +40,5 @@ def test_timed_sleepy_serf():
     l.stop()
     with open('sleep.log', 'r') as f:
         for l in f:
-            print l
+            print(l)
     os.remove('sleep.log')

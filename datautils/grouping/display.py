@@ -57,42 +57,42 @@ def as_table(g, ks0=None, ks1=None, as_cols=True, nfmt=None, default=None,
 
     # print header
     for c in cs:
-        print "\t%s" % c,
+        print("\t%s" % c, end=' ')
         if percent:
-            print "\t%s%%" % c,
-    print
+            print("\t%s%%" % c, end=' ')
+    print()
     # print values
     for r in rs:
-        print "%s" % r,
+        print("%s" % r, end=' ')
         for c in cs:
             try:
                 s = nfmt % sf(c, r)
             except KeyError:
                 s = default
             if chisquare and (chips[c] < 0.05):
-                print "\t%s*" % s,
+                print("\t%s*" % s, end=' ')
             else:
-                print "\t%s" % s,
+                print("\t%s" % s, end=' ')
             if percent:
                 try:
                     p = sf(c, r) / float(sf(cs[0], r)) * 100.
                     s = '%.0f%%' % p
                 except KeyError:
                     s = default
-                print "\t%s" % s,
-        print
+                print("\t%s" % s, end=' ')
+        print()
 
     if chisquare:
-        print "-------- chisquare results -------"
-        print "chi",
+        print("-------- chisquare results -------")
+        print("chi", end=' ')
         for c in cs:
-            print "\t%.2f" % (chis[c], ),
+            print("\t%.2f" % (chis[c], ), end=' ')
             if percent:
-                print "\t",
-        print
-        print "chi p",
+                print("\t", end=' ')
+        print()
+        print("chi p", end=' ')
         for c in cs:
-            print "\t%.3f" % (chips[c], ),
+            print("\t%.3f" % (chips[c], ), end=' ')
             if percent:
-                print "\t",
-        print
+                print("\t", end=' ')
+        print()

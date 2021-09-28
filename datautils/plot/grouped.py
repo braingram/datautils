@@ -21,7 +21,7 @@ def stat(g, f=None, fmt='%s', imshow_kwargs=None, text_kwargs=None,
     yks = sorted(s.keys())
     h = len(yks)
     w = -1
-    for i in s.values():
+    for i in list(s.values()):
         if len(i) > w:
             w = len(i)
             xks = sorted(i.keys())
@@ -51,8 +51,8 @@ def stat(g, f=None, fmt='%s', imshow_kwargs=None, text_kwargs=None,
     if text_effects is None:
         text_effects = [matplotlib.patheffects.withStroke(
             linewidth=3, foreground='w')]
-    for i in xrange(n.shape[0]):
-        for j in xrange(n.shape[1]):
+    for i in range(n.shape[0]):
+        for j in range(n.shape[1]):
             if not numpy.isnan(n[i, j]):
                 txt = pylab.text(j, i, fmt % n[i, j], **text_kwargs)
                 if text_effects is not None:
@@ -67,6 +67,6 @@ def stat(g, f=None, fmt='%s', imshow_kwargs=None, text_kwargs=None,
     if yticks_kwargs is None:
         yticks_kwargs = {}
 
-    pylab.xticks(range(len(xks)), xks, **xticks_kwargs)
-    pylab.yticks(range(len(yks)), yks, **yticks_kwargs)
+    pylab.xticks(list(range(len(xks))), xks, **xticks_kwargs)
+    pylab.yticks(list(range(len(yks))), yks, **yticks_kwargs)
     return n

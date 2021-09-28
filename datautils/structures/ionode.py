@@ -134,7 +134,7 @@ class IONode(object):
                     self.config()['addr'])
 
         def quit_gracefully(*args):
-            print("Quitting: %s" % (args, ))
+            print(("Quitting: %s" % (args, )))
             if self.connected():
                 self.disconnect()
             sys.exit(0)

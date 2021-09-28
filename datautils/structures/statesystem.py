@@ -30,7 +30,7 @@ class StateSystem(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if (self._state is None) and (self._end is True):
             self._end = False
             raise StopIteration
@@ -87,7 +87,7 @@ def test():
     ss()
 
     print("Combined output")
-    print("".join([c for c in ss]))
+    print(("".join([c for c in ss])))
 
     f0 = po(0)
     f1 = po(1)

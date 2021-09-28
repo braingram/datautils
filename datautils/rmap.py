@@ -66,8 +66,8 @@ def parse_mapping(mapping):
     """
     # dicts of key = destination key, value = query/mongo.key/function...
     ss, qs, fs, fqs = {}, {}, {}, {}
-    for k, v in mapping.iteritems():
-        if isinstance(v, (str, unicode)):
+    for k, v in mapping.items():
+        if isinstance(v, str):
             ss[k] = v
             continue
 
@@ -102,7 +102,7 @@ def parse_mapping(mapping):
 
 def apply_functions(docs, fs):
     rs = {}
-    for (rk, v) in fs.iteritems():
+    for (rk, v) in fs.items():
         rs[rk] = v['f']([d[v['k']] for d in docs])
     return rs
 
@@ -114,14 +114,14 @@ def remap(cursor, mapping, asdocs=False):
     docs = qfilter.qfilter(docs, qs)
 
     # then function, queries
-    if len(fqs.keys()):
+    if len(list(fqs.keys())):
         raise NotImplementedError("function queries are not supported [%s]"
-                                  % (fqs.keys(), ))
+                                  % (list(fqs.keys()), ))
 
     # then simple mapping
-    rs = [{} for _ in xrange(len(docs))]
-    for i in xrange(len(docs)):
-        for rk, mk in ss.iteritems():
+    rs = [{} for _ in range(len(docs))]
+    for i in range(len(docs)):
+        for rk, mk in ss.items():
             ms = re.findall('{.*?}', mk)
             if len(ms):
                 cmk = re.sub('{.*?}', '{}', mk)
@@ -136,25 +136,25 @@ def remap(cursor, mapping, asdocs=False):
     # then functions
     frs = apply_functions(docs, fs)  # returns dict
     if asdocs:
-        for fk, fv in frs.iteritems():
-            if hasattr(fv, '__len__') and (not isinstance(fv, (str, unicode))):
+        for fk, fv in frs.items():
+            if hasattr(fv, '__len__') and (not isinstance(fv, str)):
                 if len(rs) != len(fv):
                     raise MappingError(
                         "Function [%s] result length [%s] != doc length [%s]"
                         % (fk, len(fv), len(rs)))
-                for i in xrange(len(rs)):
+                for i in range(len(rs)):
                     rs[i][fk] = fv[i]
             else:  # single value
-                for i in xrange(len(rs)):
+                for i in range(len(rs)):
                     rs[i][fk] = fv
         return rs
 
     # pull out items from rs put them in frs
-    rd = dict([(k, []) for k in mapping.keys() if k not in frs.keys()])
-    for k, v in frs.iteritems():
+    rd = dict([(k, []) for k in list(mapping.keys()) if k not in list(frs.keys())])
+    for k, v in frs.items():
         rd[k] = v
     for r in rs:
-        for k in r.keys():
+        for k in list(r.keys()):
             rd[k].append(r[k])
     return rd
 

@@ -41,7 +41,7 @@ def parse_command_line(args=None):
     argi = iter(args)
     c = datautils.ddict.DDict()
     for k in argi:
-        c[k] = parse_value(argi.next())
+        c[k] = parse_value(next(argi))
     return c
 
 
@@ -86,7 +86,7 @@ def parse(cfg):
         return {}
     if isinstance(cfg, dict):
         return copy.deepcopy(cfg)
-    if isinstance(cfg, (str, unicode)):  # filename
+    if isinstance(cfg, str):  # filename
         return load(cfg)
     logger.error("Unknown cfg type %s: %s", type(cfg), cfg)
     raise TypeError("Unknown cfg type {}: {}".format(type(cfg), cfg))

@@ -2,18 +2,18 @@
 
 import logging
 
-from base import Group
+from .base import Group
 
 
 def pylinspace(start, end, n):
     d = (end - start) / (n - 1.)
-    return [start + d * i for i in xrange(n)]
+    return [start + d * i for i in range(n)]
 
 try:
     import numpy
     minmax = lambda vs: (numpy.min(vs), numpy.max(vs))
     linspace = numpy.linspace
-except ImportError, E:
+except ImportError as E:
     logging.warning("Failed to import numpy[%s] using slower minmax()" % E)
     minmax = lambda vs: (min(vs), max(vs))
     linspace = numpy.linspace
@@ -74,7 +74,7 @@ def name_function(ftype):
 
 def find_levels(values, key=None, n=None, inclusive='histogram',
                 names='start', overlap=0.0):
-    vs = values if key is None else map(key, values)
+    vs = values if key is None else list(map(key, values))
     n = len(vs) ** 0.5 if n is None else n
     vmin, vmax = minmax(vs)
     dv = (vmax - vmin) / n

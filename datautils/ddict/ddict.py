@@ -16,7 +16,7 @@ These utilities are meant to allow for access like this
 dget(d, 'a.b')
 """
 
-from ops import dget, dset, ddel
+from .ops import dget, dset, ddel
 
 
 class DDict(dict):

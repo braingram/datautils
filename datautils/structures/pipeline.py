@@ -48,7 +48,7 @@ def check_result(r, op):
         return bounds(r)
     if isinstance(bounds, (tuple, list)):  # min, max
         return ((r >= bounds[0]) and (r <= bounds[1]))
-    if isinstance(bounds, (str, unicode)):
+    if isinstance(bounds, str):
         if has_contracts:
             try:
                 contracts.check(bounds, r)
@@ -103,7 +103,7 @@ class Pipeline(object):
         # convert config 'dict' or 'list' to a stack
         if not isinstance(config, (list, tuple)):
             self._stack = [build_op(config[k], name=k) for k in sorted(
-                config.keys(), key=lambda k: get_priority(config[k]),
+                list(config.keys()), key=lambda k: get_priority(config[k]),
                 reverse=True)]
         else:
             self._stack = [build_op(f) for f in config]

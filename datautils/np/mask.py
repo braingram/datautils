@@ -113,7 +113,7 @@ def test_mask_array():
     arr = numpy.array
     s = numpy.sum
 
-    a = arr(range(10))
+    a = arr(list(range(10)))
     assert s(ma(a, 10, 'less')) == 10
     assert s(ma(a, -1, 'greater')) == 10
     assert s(ma(a, 5, 'less')) == 5

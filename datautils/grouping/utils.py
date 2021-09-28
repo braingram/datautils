@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from continuous import ContinuousGroup
-from discrete import DiscreteGroup
+from .continuous import ContinuousGroup
+from .discrete import DiscreteGroup
 from .. import ddict
 
 DefaultGroup = DiscreteGroup
@@ -72,11 +72,11 @@ def group2(values, key1=None, key2=None,
     return dict([(k, group(v, key=key2, levels=levels2,
                  gtype=gtype2, gkwargs=gkwargs2))
                  for k, v in group(values, key=key1, levels=levels1,
-                 gtype=gtype1, gkwargs=gkwargs1).iteritems()])
+                 gtype=gtype1, gkwargs=gkwargs1).items()])
 
 
 def dwalk(d):
-    for k, v in d.iteritems():
+    for k, v in d.items():
         if isinstance(v, dict):
             for sk, sv in dwalk(v):
                 yield (k, ) + sk, sv
@@ -110,7 +110,7 @@ def groupn(values, keys=None, levels=None, gtypes=None, gkwargs=None,
             raise ValueError("argument does not contain enough "
                              "[%i] items: %s" % (nlvls, i))
 
-    for i in xrange(nlvls):
+    for i in range(nlvls):
         if i == 0:
             g = group(values, keys[i], levels[i], gtypes[i], gkwargs[i],
                       dget=dget)

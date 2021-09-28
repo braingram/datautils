@@ -56,8 +56,8 @@ def discrete_to_codes_from_auto_sorted_codec(values, \
     for v in values:
         codec[v] = 1
     # code range / value range
-    m = (code_max - code_min) / (len(codec.keys()) - 1)
-    for (i, k) in enumerate(sort_codec(codec.keys())):
+    m = (code_max - code_min) / (len(list(codec.keys())) - 1)
+    for (i, k) in enumerate(sort_codec(list(codec.keys()))):
         codec[k] = (i * m) + code_min
     return discrete_to_codes_from_codec(values, codec)
 

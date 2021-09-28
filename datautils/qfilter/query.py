@@ -20,7 +20,7 @@ def splits(data, key, n):
     delta = (maxv - minv) / float(n)
     s = minv
     qs = []
-    for i in xrange(n):
+    for i in range(n):
         e = s + delta
         qs.append({key: {'$gte': s, '$lt': e}})
         s = e
@@ -130,7 +130,7 @@ def make_value_test(value):
         return lambda v: value in v if isinstance(v, (tuple, list)) \
                 else eq(v, value)
     # run all value tests, short-circuit on first False
-    tests = [vtests[k](v) for k, v in value.iteritems()]
+    tests = [vtests[k](v) for k, v in value.items()]
     return lambda v: all((t(v) for t in tests))
 # -------------------------------------------
 
@@ -177,7 +177,7 @@ def make_query_test(query):
     """
     Parse a query dictionary and return a test function
     """
-    tests = [make_item_test(k, v) for k, v in query.iteritems()]
+    tests = [make_item_test(k, v) for k, v in query.items()]
 
     # use a generator function for short-circuitinga
     #print "Query: %s" % query

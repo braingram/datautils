@@ -2,6 +2,7 @@
 
 from .. import ddict
 from ..listify import listify
+from functools import reduce
 
 
 class GroupingOpsError(Exception):
@@ -11,10 +12,10 @@ class GroupingOpsError(Exception):
 def depth(d, l=0):
     """Measure grouping depth [how nested is this dict?]"""
     if isinstance(d, dict):
-        if not len(d.values()):
+        if not len(list(d.values())):
             return l
         l += 1
-        return max([depth(v, l) for v in d.values()])
+        return max([depth(v, l) for v in list(d.values())])
     else:
         return l
 
@@ -34,13 +35,13 @@ def breadth(d, level=0, f=max):
         if not isinstance(d, dict):
             raise GroupingOpsError(
                 "breadth can only be measured for dicts not %s" % type(d))
-        return len(d.keys())
+        return len(list(d.keys()))
     else:
         if depth(d) <= level:
             return 0
             #raise GroupingOpsError("Invalid breadth level: %i >= %i"
             #                             % (level, depth(d)))
-        return f([breadth(d[k], level - 1) for k in d.keys()
+        return f([breadth(d[k], level - 1) for k in list(d.keys())
                   if isinstance(d[k], dict)])
 
 
@@ -49,13 +50,13 @@ def all_keys(d, level=0):
         if not isinstance(d, dict):
             raise GroupingOpsError(
                 "breadth can only be measured for dicts not %s" % type(d))
-        return d.keys()
+        return list(d.keys())
     else:
         if depth(d) <= level:
             return []
         return list(set(reduce(
             lambda a, b: a + b,
-            [all_keys(d[k], level - 1) for k in d.keys()
+            [all_keys(d[k], level - 1) for k in list(d.keys())
              if isinstance(d[k], dict)])))
 
 
@@ -81,7 +82,7 @@ def combine(d0, d1, r=None):
         return listify(d0) + listify(d1)
     if r is None:
         r = {}
-    for k in set(d0.keys() + d1.keys()):
+    for k in set(list(d0.keys()) + list(d1.keys())):
         r[k] = combine(ddict.ops.tdget(d0, k, None),
                        ddict.ops.tdget(d1, k, None))
     return r
@@ -122,14 +123,14 @@ def drop_levels(groups, lvls):
     if lvls[0] == 0:
         lvls.pop(0)
         dl = [l - 1 for l in lvls]
-        for k, v in groups.iteritems():
+        for k, v in groups.items():
             r = combine(r, drop_levels(v, dl))
         return r
 
     # don't drop
     r = {}
     dl = [l - 1 for l in lvls]
-    for k, v in groups.iteritems():
+    for k, v in groups.items():
         r[k] = drop_levels(v, dl)
     return r
 
@@ -138,7 +139,7 @@ def leaves(groups):
     """
     Drop all groups, returning all the leaf values
     """
-    return drop_levels(groups, range(depth(groups)))
+    return drop_levels(groups, list(range(depth(groups))))
 
 
 def collapse(groups, spaces):
@@ -184,17 +185,17 @@ def collapse(groups, spaces):
         spaces.pop(0)
         dl = [l - 1 for l in spaces]
         r = {}
-        for k, v in groups.iteritems():
+        for k, v in groups.items():
             # TODO check v is dict
             if not isinstance(v, dict):
                 raise ValueError("Invalid collapse level")
-            for k2, v2 in v.iteritems():
+            for k2, v2 in v.items():
                 r[tuple(list(listify(k)) + list(listify(k2)))] = v2
         return collapse(r, dl)
 
     # don't collapse
     dl = [l - 1 for l in spaces]
-    for k, v in groups.iteritems():
+    for k, v in groups.items():
         r[k] = collapse(v, dl)
     return r
 
@@ -212,11 +213,11 @@ def prune(gts, *keys):
         {'a': {'b': [{'c': 3}]}}
     """
     r = {}
-    for k in gts.keys():
+    for k in list(gts.keys()):
         if isinstance(gts[k], dict):
             r[k] = prune(gts[k], *keys)
         elif isinstance(gts[k], (list, tuple)):
-            r[k] = [dict([(sk, i[sk]) for sk in i.keys() if sk not in keys])
+            r[k] = [dict([(sk, i[sk]) for sk in list(i.keys()) if sk not in keys])
                     for i in gts[k]]
     return r
 
@@ -241,7 +242,7 @@ def pick(gts, key, default=None):
     """
     if isinstance(gts, dict):
         r = {}
-        for k in gts.keys():
+        for k in list(gts.keys()):
             if isinstance(gts[k], dict):
                 r[k] = pick(gts[k], key)
             elif isinstance(gts[k], (list, tuple)):
@@ -267,7 +268,7 @@ def stat(gts, func, pick_key=None):
         d = gts
 
     r = {}
-    for k in d.keys():
+    for k in list(d.keys()):
         if isinstance(d[k], dict):
             r[k] = stat(d[k], func)
         elif isinstance(d[k], (list, tuple)):

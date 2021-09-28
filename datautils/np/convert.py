@@ -28,9 +28,9 @@ def guess_type(v):
     if len(v) < 1:
         raise GuessError("Cannot guess type for 0 length array")
     if isinstance(v[0], str):
-        return 'S' + str(max(map(len, v)))
-    if isinstance(v[0], unicode):
-        return 'U' + str(max(map(len, v)))
+        return 'S' + str(max(list(map(len, v))))
+    if isinstance(v[0], str):
+        return 'U' + str(max(list(map(len, v))))
     return type(v[0])
 
 
@@ -48,7 +48,7 @@ def ordered_labeled_array(*args):
         dt = [(k, guess_type(v)) for (k, v) in args]
     except GuessError as E:
         raise Exception("Failed to guess type: %s" % E)
-    return numpy.array(zip(*[v for (_, v) in args]), dtype=dt)
+    return numpy.array(list(zip(*[v for (_, v) in args])), dtype=dt)
 
 
 def labeled_array(**kwargs):
@@ -96,7 +96,7 @@ def grouping_to_array(g, default=None, dtype=None, stat=None, pick=None):
     if stat is not None:
         g = grouping.ops.stat(g, stat, pick)
     keys = []
-    for di in xrange(grouping.ops.depth(g)):
+    for di in range(grouping.ops.depth(g)):
         keys.append(sorted(grouping.ops.all_keys(g, di)))
     if dtype is None:
         dtype = guess_type(grouping.ops.leaves(g))

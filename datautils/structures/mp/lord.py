@@ -38,7 +38,7 @@ class Lord(object):
         raise serf.SerfError(*args, **kwargs)
 
     def send(self, attr, *args, **kwargs):
-        assert isinstance(attr, (str, unicode))
+        assert isinstance(attr, str)
         self.pipe.send((attr, args, kwargs))
 
     def start(self, serf_class, args=None, kwargs=None, wait=True):

@@ -12,8 +12,8 @@ from ..listify import listify
 
 def not_vtest(a, v):
     assert isinstance(v, dict)
-    assert len(v.keys()) == 1
-    op = v.keys()[0]
+    assert len(list(v.keys())) == 1
+    op = list(v.keys())[0]
     val = v[op]
     return numpy.logical_not(value_test(a, op, val))
 
@@ -69,7 +69,7 @@ def value_test(vs, k, v):
 
 
 def subparse(vs, q, mask):
-    for k, v in q.iteritems():
+    for k, v in q.items():
         mask = numpy.logical_and(mask, value_test(vs, k, v))
     return mask
 
@@ -81,7 +81,7 @@ def mask(array, query, mask=None):
         if numpy.sum(mask) == 0:  # short circuit
             return mask
     # keys are columns
-    for k, v in query.iteritems():
+    for k, v in query.items():
         if isinstance(v, dict):
             mask = subparse(array[k], v, mask)
         else:
@@ -101,7 +101,7 @@ def query_array(array, q):
 
 def test():
     a = []
-    for i in xrange(97, 107):
+    for i in range(97, 107):
         a.append((i, float(i), chr(i), (i, i * 2, i * 3)))
     dt = numpy.dtype(
         [('i', 'i4'), ('f', 'f4'), ('s', 'S2'), ('a', 'f4', (3,))])

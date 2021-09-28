@@ -142,7 +142,7 @@ def plot(args=None, **kwargs):
     query.update(opts.pop('query', {}))
 
     groupkey = kwargs.pop('group', None)
-    if (groupkey is not None) and (not isinstance(groupkey, (str, unicode))):
+    if (groupkey is not None) and (not isinstance(groupkey, str)):
         raise ValueError("Grouping can only be done by string: %s" % groupkey)
 
     post = kwargs.pop('post', False)
@@ -172,7 +172,7 @@ def plot(args=None, **kwargs):
         g = grouping.group(data, groupkey)
         ks = sorted(g.keys())
         cm = pylab.cm.get_cmap()
-        colors = [cm(float(i) / (len(ks) - 1)) for i in xrange(len(ks))]
+        colors = [cm(float(i) / (len(ks) - 1)) for i in range(len(ks))]
         for (c, k) in zip(colors, ks):
             f(g[k], opts, decorate=True, label=k, color=c, **kwargs)
         pylab.legend()

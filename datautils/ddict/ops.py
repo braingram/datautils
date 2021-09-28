@@ -46,13 +46,13 @@ def dget(d, k, delimiter='.'):
     """
     dotted get
     """
-    if isinstance(k, (str, unicode)):
+    if isinstance(k, str):
         return rget(d, *k.split(delimiter))
     return rget(d, k)
 
 
 def dset(d, k, v, delimiter='.'):
-    if isinstance(k, (str, unicode)):
+    if isinstance(k, str):
         ks = k.split(delimiter)
         rset(d, ks[0], v, *ks[1:])
     else:
@@ -60,7 +60,7 @@ def dset(d, k, v, delimiter='.'):
 
 
 def ddel(d, k, delimiter='.'):
-    if isinstance(k, (str, unicode)):
+    if isinstance(k, str):
         rdel(d, *k.split(delimiter))
     else:
         rdel(d, k)

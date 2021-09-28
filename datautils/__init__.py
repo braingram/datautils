@@ -32,7 +32,7 @@ except ImportError as E:
 
 
 try:
-    import plot
+    from . import plot
     __all__.append('plot')
 except ImportError as E:
     warnings.warn('datautils.plot failed to import with: %s' % E)

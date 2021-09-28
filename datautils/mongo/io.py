@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-import cPickle as pickle
+import pickle as pickle
 
 import numpy
 import pymongo
@@ -21,7 +21,7 @@ def write(d, pchar=','):
     """
     if isinstance(d, dict):
         nd = {}
-        for k in d.keys():
+        for k in list(d.keys()):
             nk = str(k)
             nk = nk.replace('.', pchar)
             nd[nk] = write(d[k])
@@ -56,7 +56,7 @@ def read(d, dclass=ddict.DDict):
     By default returns DDicts rather than dicts
     """
     if isinstance(d, dict):
-        return dclass([(k, read(v)) for (k, v) in d.iteritems()])
+        return dclass([(k, read(v)) for (k, v) in d.items()])
     elif isinstance(d, (list, tuple)):
         return type(d)([read(v) for v in d])
     elif isinstance(d, binary.Binary):

@@ -2,20 +2,20 @@
 
 import logging
 
-from base import Group
+from .base import Group
 
 
 def pyunique(values):
     r = {}
     for v in values:
         r[v] = 1
-    return r.keys()
+    return list(r.keys())
 
 
 try:
     import numpy
     unique = numpy.unique
-except ImportError, E:
+except ImportError as E:
     logging.warning("Failed to import numpy[%s] defining unique()" % E)
     unique = pyunique
 
@@ -32,7 +32,7 @@ def level_test(name):
 
 
 def find_levels(values, key=None, **kwargs):
-    vs = values if key is None else map(key, values)
+    vs = values if key is None else list(map(key, values))
     ns = unique(vs)
     try:
         ns.sort()
