@@ -72,7 +72,12 @@ class Serf(object):
                     self.send(attr, result)
             except Exception as e:
                 traceback.print_exc(file=sys.stdout)
-                if self.error(str(e)):
+                # get traceback for exception
+                _, _, tb = sys.exc_info()
+                # convert to string
+                tbs = ''.join(traceback.format_tb(tb))
+                del tb
+                if self.error(str(e), tbs):
                     break
                 else:
                     continue
