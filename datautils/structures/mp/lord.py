@@ -64,7 +64,10 @@ class Lord(object):
         if not wait:
             return
         while self.process.is_alive():
-            self.update()
+            try:
+                self.update()
+            except EOFError:
+                break
         self.process.join()
         self.process = None
 
